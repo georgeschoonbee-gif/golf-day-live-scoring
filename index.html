@@ -11,36 +11,54 @@
     <header class="topbar">
       <div>
         <h1>Golf Day Live Scoring</h1>
-        <p id="eventSubtitle">Reusable golf-day scoring app</p>
+        <p id="eventSubtitle">Loading tournament…</p>
       </div>
-      <div class="status-pill">Local demo mode</div>
+      <div class="status-pill" id="connectionStatus">Connecting…</div>
     </header>
 
     <nav class="tabs">
       <button data-tab="home" class="tab-btn active">Home</button>
-      <button data-tab="scores" class="tab-btn">Enter Scores</button>
+      <button data-tab="scores" class="tab-btn">Scores</button>
       <button data-tab="leaderboard" class="tab-btn">Leaderboard</button>
+      <button data-tab="captain" class="tab-btn">Captain Login</button>
       <button data-tab="admin" class="tab-btn">Admin</button>
     </nav>
 
     <main>
       <section id="home" class="tab-panel active">
         <div class="metrics">
-          <div class="metric"><span>Competition</span><strong id="homeCompetition">Golf Day</strong></div>
-          <div class="metric"><span>Course</span><strong id="homeCourse">Not selected</strong></div>
-          <div class="metric"><span>Teams</span><strong id="homeTeams">2</strong></div>
-          <div class="metric"><span>Handicap allowance</span><strong id="homeAllowance">100%</strong></div>
+          <div class="metric"><span>Competition</span><strong id="homeCompetition">—</strong></div>
+          <div class="metric"><span>Course</span><strong id="homeCourse">—</strong></div>
+          <div class="metric"><span>Teams</span><strong id="homeTeams">—</strong></div>
+          <div class="metric"><span>Handicap allowance</span><strong id="homeAllowance">—</strong></div>
         </div>
 
         <div class="panel">
-          <h2>Current format</h2>
-          <p id="homeFormat">Scramble Drive + Individual IPS</p>
-          <p class="muted">Players enter gross scores. The app calculates playing handicap and Stableford/IPS points.</p>
+          <h2>Competition format</h2>
+          <p id="homeFormat">—</p>
+          <p class="muted">Players and spectators can view scores. Only the team captain can enter or change that team's scores.</p>
+        </div>
+
+        <div class="panel">
+          <h2>View a team</h2>
+          <div class="form-grid two">
+            <label>Team
+              <select id="viewerTeam"></select>
+            </label>
+            <div class="button-row align-end">
+              <button id="viewTeamScorecard" class="secondary">View Scorecard</button>
+            </div>
+          </div>
+          <div id="viewerScorecard"></div>
         </div>
       </section>
 
       <section id="scores" class="tab-panel">
         <div class="panel">
+          <div id="scoreAccessNotice" class="notice">
+            Captain login is required to enter scores. Everyone can still view the scorecard below.
+          </div>
+
           <div class="form-grid two">
             <label>Team
               <select id="scoreTeam"></select>
@@ -53,7 +71,7 @@
           <div class="hole-header">
             <div>
               <h2 id="holeTitle">Hole 1</h2>
-              <p id="holeMeta" class="muted">Par 4 • SI 1</p>
+              <p id="holeMeta" class="muted">—</p>
             </div>
             <div class="status-pill" id="holeTeamPoints">Team: 0 pts</div>
           </div>
@@ -74,11 +92,10 @@
           <div class="section-title-row">
             <div>
               <h2>Live Leaderboard</h2>
-              <p class="muted">This demo updates instantly on the current device.</p>
+              <p class="muted">Updates from the shared Supabase database.</p>
             </div>
             <button id="refreshLeaderboard" class="secondary">Refresh</button>
           </div>
-
           <div class="table-wrap">
             <table>
               <thead>
@@ -90,10 +107,34 @@
         </div>
       </section>
 
+      <section id="captain" class="tab-panel">
+        <div class="panel captain-login">
+          <h2>Team Captain Login</h2>
+          <p class="muted">Choose your team and enter the password created by the tournament admin.</p>
+          <label>Team
+            <select id="captainTeam"></select>
+          </label>
+          <label>Captain password
+            <input id="captainPassword" type="password" autocomplete="current-password" />
+          </label>
+          <div class="button-row">
+            <button id="captainLogin">Sign In</button>
+            <button id="captainLogout" class="secondary hidden">Sign Out</button>
+          </div>
+          <div id="captainLoginStatus" class="muted"></div>
+        </div>
+
+        <div id="captainSession" class="panel hidden">
+          <h2>Captain access active</h2>
+          <p id="captainSessionText"></p>
+          <button id="goToScores">Enter Team Scores</button>
+        </div>
+      </section>
+
       <section id="admin" class="tab-panel">
         <div id="adminLocked" class="panel admin-login">
           <h2>Admin Login</h2>
-          <p class="muted">Enter the admin password to change tournament settings.</p>
+          <p class="muted">Admin password: use your tournament admin password.</p>
           <label>Password
             <input id="adminPassword" type="password" autocomplete="current-password" />
           </label>
@@ -112,11 +153,7 @@
 
             <div class="form-grid two">
               <label>Competition name
-                <input id="competitionName" />
-              </label>
-
-              <label>Course
-                <select id="courseSelect"></select>
+                <input id="competitionName" value="Golf Day Championship" />
               </label>
 
               <label>Scoring type
@@ -136,35 +173,26 @@
                   <option value="1">1</option>
                   <option value="2">2</option>
                   <option value="3">3</option>
-                  <option value="4">4</option>
+                  <option value="4" selected>4</option>
                 </select>
               </label>
 
               <label>Handicap allowance %
-                <input id="handicapAllowance" type="number" min="0" max="100" />
+                <input id="handicapAllowance" type="number" min="0" max="100" value="100" />
               </label>
 
-              <label>Minimum drives per player
-                <input id="minDrives" type="number" min="0" max="18" />
+              <label>Minimum selected drives per player
+                <input id="minDrives" type="number" min="0" max="18" value="0" />
               </label>
             </div>
-
-            <button id="saveSettings">Save Competition Settings</button>
           </div>
 
           <div class="panel">
-            <h2>Course Library</h2>
-            <p class="muted">Save course names plus all 18 holes for future use on this browser/device.</p>
-
+            <h2>Course</h2>
             <div class="form-grid two">
               <label>Course name
                 <input id="courseName" placeholder="e.g. Jacobsdal Golf Club" />
               </label>
-              <div class="button-row align-end">
-                <button id="newCourse" class="secondary">New Course</button>
-                <button id="saveCourse">Save Course</button>
-                <button id="deleteCourse" class="danger">Delete Course</button>
-              </div>
             </div>
 
             <div class="table-wrap">
@@ -173,24 +201,37 @@
                 <tbody id="courseEditor"></tbody>
               </table>
             </div>
-            <div id="courseStatus" class="muted"></div>
           </div>
 
           <div class="panel">
             <div class="section-title-row">
               <div>
                 <h2>Teams & Players</h2>
-                <p class="muted">2–18 teams, 4 players per team.</p>
+                <p class="muted">2–18 teams, 4 players per team. Set a captain and a password for every team.</p>
               </div>
               <button id="addTeam" class="secondary">+ Add Team</button>
             </div>
             <div id="teamEditor"></div>
+          </div>
+
+          <div class="panel">
+            <h2>Publish Tournament</h2>
+            <p class="muted">Publishing sends the course, teams, players and captain passwords to Supabase so all phones use the same tournament.</p>
+            <div class="notice danger-note">
+              Publishing an existing tournament currently resets its scores. Do this before play starts.
+            </div>
+            <div class="button-row">
+              <button id="publishTournament">Publish to Live Database</button>
+              <button id="resetScores" class="danger">Reset All Scores</button>
+            </div>
+            <div id="publishStatus" class="muted"></div>
           </div>
         </div>
       </section>
     </main>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
 </body>
 </html>

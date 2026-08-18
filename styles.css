@@ -19,7 +19,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 input,select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:#fff}
 label{display:block;font-size:14px;font-weight:600}
 label input,label select{margin-top:6px;font-weight:400}
-.app-shell{max-width:1050px;margin:0 auto;padding:18px}
+.app-shell{max-width:1080px;margin:0 auto;padding:18px}
 .topbar{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:16px}
 .topbar h1{margin:0;font-size:26px}
 .topbar p{margin:4px 0 0;color:var(--muted)}
@@ -43,19 +43,26 @@ label input,label select{margin-top:6px;font-weight:400}
 .table-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse}
 th,td{text-align:left;padding:10px;border-bottom:1px solid var(--border)}
-.player-row{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:12px;align-items:end;border:1px solid var(--border);border-radius:14px;padding:12px;margin:10px 0}
+.player-row{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:12px;align-items:end;border:1px solid var(--border);border-radius:14px;padding:12px;margin:10px 0}
 .player-name{font-weight:700}
 .small{font-size:13px;color:var(--muted)}
 .team-card{border-top:1px solid var(--border);padding-top:16px;margin-top:16px}
 .team-head{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+.team-meta{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
 .team-players{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}
 .player-edit{border:1px solid var(--border);border-radius:14px;padding:12px}
 .hidden{display:none!important}
-.admin-login{max-width:460px}
-.notice{background:var(--accent2);border-radius:12px;padding:12px;margin-top:12px}
+.admin-login,.captain-login{max-width:480px}
+.notice{background:var(--accent2);border-radius:12px;padding:12px;margin:12px 0}
+.danger-note{background:#f8e9e9;color:#742323}
+.scorecard-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.scorecell{border:1px solid var(--border);border-radius:10px;padding:8px;text-align:center}
+.scorecell strong{display:block}
+.viewer-player{margin-top:14px}
 @media(max-width:760px){
   .metrics{grid-template-columns:repeat(2,1fr)}
-  .form-grid.two,.team-players{grid-template-columns:1fr}
+  .form-grid.two,.team-players,.team-meta{grid-template-columns:1fr}
   .player-row{grid-template-columns:1fr 1fr}
   .topbar{align-items:flex-start;flex-direction:column}
+  .scorecard-grid{grid-template-columns:repeat(3,1fr)}
 }
