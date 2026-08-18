@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Golf Day Live Scoring</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <h1>Golf Day Live Scoring</h1>
+        <p id="eventSubtitle">Reusable golf-day scoring app</p>
+      </div>
+      <div class="status-pill">Local demo mode</div>
+    </header>
+
+    <nav class="tabs">
+      <button data-tab="home" class="tab-btn active">Home</button>
+      <button data-tab="scores" class="tab-btn">Enter Scores</button>
+      <button data-tab="leaderboard" class="tab-btn">Leaderboard</button>
+      <button data-tab="admin" class="tab-btn">Admin</button>
+    </nav>
+
+    <main>
+      <section id="home" class="tab-panel active">
+        <div class="metrics">
+          <div class="metric"><span>Competition</span><strong id="homeCompetition">Golf Day</strong></div>
+          <div class="metric"><span>Course</span><strong id="homeCourse">Not selected</strong></div>
+          <div class="metric"><span>Teams</span><strong id="homeTeams">2</strong></div>
+          <div class="metric"><span>Handicap allowance</span><strong id="homeAllowance">100%</strong></div>
+        </div>
+
+        <div class="panel">
+          <h2>Current format</h2>
+          <p id="homeFormat">Scramble Drive + Individual IPS</p>
+          <p class="muted">Players enter gross scores. The app calculates playing handicap and Stableford/IPS points.</p>
+        </div>
+      </section>
+
+      <section id="scores" class="tab-panel">
+        <div class="panel">
+          <div class="form-grid two">
+            <label>Team
+              <select id="scoreTeam"></select>
+            </label>
+            <label>Hole
+              <select id="scoreHole"></select>
+            </label>
+          </div>
+
+          <div class="hole-header">
+            <div>
+              <h2 id="holeTitle">Hole 1</h2>
+              <p id="holeMeta" class="muted">Par 4 • SI 1</p>
+            </div>
+            <div class="status-pill" id="holeTeamPoints">Team: 0 pts</div>
+          </div>
+
+          <div id="playerScoreRows"></div>
+
+          <div class="button-row">
+            <button id="prevHole" class="secondary">← Previous</button>
+            <button id="saveHole">Save Hole</button>
+            <button id="nextHole" class="secondary">Next →</button>
+          </div>
+          <div id="saveStatus" class="muted"></div>
+        </div>
+      </section>
+
+      <section id="leaderboard" class="tab-panel">
+        <div class="panel">
+          <div class="section-title-row">
+            <div>
+              <h2>Live Leaderboard</h2>
+              <p class="muted">This demo updates instantly on the current device.</p>
+            </div>
+            <button id="refreshLeaderboard" class="secondary">Refresh</button>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Pos</th><th>Team</th><th>Thru</th><th id="leaderValueHeader">Points</th></tr>
+              </thead>
+              <tbody id="leaderboardBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="admin" class="tab-panel">
+        <div id="adminLocked" class="panel admin-login">
+          <h2>Admin Login</h2>
+          <p class="muted">Enter the admin password to change tournament settings.</p>
+          <label>Password
+            <input id="adminPassword" type="password" autocomplete="current-password" />
+          </label>
+          <div class="button-row">
+            <button id="adminLogin">Unlock Admin</button>
+          </div>
+          <div id="adminLoginStatus" class="muted"></div>
+        </div>
+
+        <div id="adminContent" class="hidden">
+          <div class="panel">
+            <div class="section-title-row">
+              <h2>Competition Setup</h2>
+              <button id="adminLogout" class="secondary">Lock Admin</button>
+            </div>
+
+            <div class="form-grid two">
+              <label>Competition name
+                <input id="competitionName" />
+              </label>
+
+              <label>Course
+                <select id="courseSelect"></select>
+              </label>
+
+              <label>Scoring type
+                <select id="scoringType">
+                  <option value="scramble4">Scramble Drive + Individual IPS</option>
+                  <option value="alliance">4-Ball Alliance</option>
+                  <option value="betterball">Betterball Stableford</option>
+                  <option value="individual">Individual Stableford</option>
+                  <option value="stroke">Stroke Play</option>
+                  <option value="betterballStroke">Betterball Stroke Play</option>
+                  <option value="texas">Texas Scramble</option>
+                </select>
+              </label>
+
+              <label>Scores to count
+                <select id="scoresToCount">
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                </select>
+              </label>
+
+              <label>Handicap allowance %
+                <input id="handicapAllowance" type="number" min="0" max="100" />
+              </label>
+
+              <label>Minimum drives per player
+                <input id="minDrives" type="number" min="0" max="18" />
+              </label>
+            </div>
+
+            <button id="saveSettings">Save Competition Settings</button>
+          </div>
+
+          <div class="panel">
+            <h2>Course Library</h2>
+            <p class="muted">Save course names plus all 18 holes for future use on this browser/device.</p>
+
+            <div class="form-grid two">
+              <label>Course name
+                <input id="courseName" placeholder="e.g. Jacobsdal Golf Club" />
+              </label>
+              <div class="button-row align-end">
+                <button id="newCourse" class="secondary">New Course</button>
+                <button id="saveCourse">Save Course</button>
+                <button id="deleteCourse" class="danger">Delete Course</button>
+              </div>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Hole</th><th>Par</th><th>Stroke Index</th></tr></thead>
+                <tbody id="courseEditor"></tbody>
+              </table>
+            </div>
+            <div id="courseStatus" class="muted"></div>
+          </div>
+
+          <div class="panel">
+            <div class="section-title-row">
+              <div>
+                <h2>Teams & Players</h2>
+                <p class="muted">2–18 teams, 4 players per team.</p>
+              </div>
+              <button id="addTeam" class="secondary">+ Add Team</button>
+            </div>
+            <div id="teamEditor"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
