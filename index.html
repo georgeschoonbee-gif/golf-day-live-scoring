@@ -20,6 +20,7 @@
       <button data-tab="home" class="tab-btn active">Home</button>
       <button data-tab="scores" class="tab-btn">Scores</button>
       <button data-tab="leaderboard" class="tab-btn">Leaderboard</button>
+      <button data-tab="final" class="tab-btn">Final Results</button>
       <button data-tab="captain" class="tab-btn">Captain Login</button>
       <button data-tab="admin" class="tab-btn">Admin</button>
     </nav>
@@ -104,6 +105,20 @@
               <tbody id="leaderboardBody"></tbody>
             </table>
           </div>
+        </div>
+      </section>
+
+
+      <section id="final" class="tab-panel">
+        <div class="panel">
+          <div class="section-title-row">
+            <div>
+              <h2>Final Results</h2>
+              <p class="muted">Teams are ranked from first to last. Player totals are shown under each team.</p>
+            </div>
+            <button id="downloadResultsPdf">Download Results PDF</button>
+          </div>
+          <div id="finalResultsList"></div>
         </div>
       </section>
 
@@ -214,6 +229,36 @@
             <div id="teamEditor"></div>
           </div>
 
+
+          <div class="panel">
+            <h2>Admin Score Correction</h2>
+            <p class="muted">Correct any team score without needing the captain password.</p>
+
+            <div class="form-grid two">
+              <label>Team
+                <select id="adminCorrectionTeam"></select>
+              </label>
+              <label>Hole
+                <select id="adminCorrectionHole"></select>
+              </label>
+            </div>
+
+            <div class="hole-header">
+              <div>
+                <h3 id="adminCorrectionTitle">Hole 1</h3>
+                <p id="adminCorrectionMeta" class="muted">—</p>
+              </div>
+              <div class="status-pill" id="adminCorrectionTeamPoints">Team: 0 pts</div>
+            </div>
+
+            <div id="adminCorrectionRows"></div>
+
+            <div class="button-row">
+              <button id="saveAdminCorrection">Save Corrected Scores</button>
+            </div>
+            <div id="adminCorrectionStatus" class="muted"></div>
+          </div>
+
           <div class="panel">
             <h2>Publish Tournament</h2>
             <p class="muted">Publishing sends the course, teams, players and captain passwords to Supabase so all phones use the same tournament.</p>
@@ -232,6 +277,8 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
