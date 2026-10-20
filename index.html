@@ -20,7 +20,6 @@
     <button class="tab-btn" data-tab="matches">Matches</button>
     <button class="tab-btn player-tab" data-tab="player">My Score</button>
     <button class="tab-btn" data-tab="captain">Captain</button>
-    <button class="tab-btn" data-tab="final">Final Results</button>
     <button class="tab-btn" data-tab="admin">Admin</button>
   </nav>
   <main>
@@ -36,6 +35,13 @@
       <div class="panel">
         <h2>Tour Standings</h2>
         <div id="homeLeaderboard"></div>
+      </div>
+      <div class="panel">
+        <div class="section-title-row">
+          <div><h2>Results Summary</h2><p class="muted">Live during the tour and final once the winner is decided.</p></div>
+          <button id="downloadPdf">Download Results PDF</button>
+        </div>
+        <div id="homeFinalResults"></div>
       </div>
       <div class="panel"><h2>Rounds</h2><div id="roundCards" class="round-grid"></div></div>
     </section>
@@ -109,7 +115,6 @@
         </div>
       </div>
     </section>
-    <section id="final" class="tab-panel"><div class="panel"><div class="section-title-row"><div><h2>Final Results</h2><p class="muted">Overall team match points with each round's contribution.</p></div><button id="downloadPdf">Download PDF</button></div><div id="finalResults"></div></div></section>
     <section id="admin" class="tab-panel">
       <div id="adminLoginPanel" class="panel narrow"><h2>Admin Login</h2><label>Password<input id="adminPassword" type="password"></label><div class="button-row"><button id="adminLogin">Unlock Admin</button><button id="adminLogout" class="secondary hidden">Lock Admin</button></div><p id="adminStatus" class="muted"></p></div>
       <div id="adminWorkspace" class="hidden">
