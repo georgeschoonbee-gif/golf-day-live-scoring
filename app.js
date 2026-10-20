@@ -1,3 +1,13 @@
+function removeLegacyCaptainScorePanel(){
+  const old=document.getElementById("captainScoreRound");
+  if(old){
+    const panel=old.closest(".panel");
+    if(panel)panel.remove();
+  }
+}
+document.addEventListener("DOMContentLoaded",removeLegacyCaptainScorePanel);
+removeLegacyCaptainScorePanel();
+
 const SUPABASE_URL="https://nozjqxuxfvwweatqerpq.supabase.co";
 const SUPABASE_KEY="sb_publishable_DZjClCBchJgK-WWHx_Zo5g_0rWmnmgN";
 const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
