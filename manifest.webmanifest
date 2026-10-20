@@ -1,0 +1,9 @@
+{
+  "name":"Jacobsdal Golf Tour",
+  "short_name":"Jacobsdal Golf",
+  "start_url":"./",
+  "display":"standalone",
+  "background_color":"#f3f7f4",
+  "theme_color":"#063c25",
+  "description":"Jacobsdal Golf Tour live and offline scoring"
+}
