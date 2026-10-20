@@ -267,6 +267,9 @@ function setPlayerHole(n){
  const h=crs.holes.find(x=>Number(x.hole)===n);
  $("playerHoleMeta").textContent=h?("Par "+h.par+" • SI "+h.stroke):"";
  const s=score(m.id,playerSession.playerId,n);$("playerGross").value=s?.gross_score||"";$("playerDrive").value=s?.drive_used?"yes":"";
+ const locked=!!s;
+ $("playerGross").disabled=locked;
+ $("playerDrive").disabled=locked;
  $("playerDriveWrap").classList.toggle("hidden",r.format_code!=="betterball_scramble_drive");
  const st=matchState(m);
  const opp=m.players.filter(mp=>mp.team_id!==playerSession.teamId).map(mp=>player(mp.player_id)?.name).filter(Boolean).join(" + ");
@@ -276,7 +279,7 @@ function setPlayerHole(n){
  $("playerMatchInfo").innerHTML="<strong>"+esc(formatLabel(r.format_code))+"</strong><br>"+mateLine+oppLabel+": "+esc(opp||"—")+'<br><span class="badge">'+esc(st.resultText)+"</span>";
  if(s?.gross_score&&h){
   const hp=strokesFor(m,r,player(playerSession.playerId)),nett=s.gross_score-holeStrokes(hp,h.stroke),pts=stableford(s.gross_score,h.par,hp,h.stroke);
-  $("playerHoleResult").textContent="Saved: "+s.gross_score+" gross • "+nett+" nett"+(r.format_code==="stableford_count"?(" • "+pts+" pts"):"");
+  $("playerHoleResult").textContent="Locked ✓ • "+s.gross_score+" gross • "+nett+" nett"+(r.format_code==="stableford_count"?(" • "+pts+" pts"):"");
  }else $("playerHoleResult").textContent="No score saved for this hole yet.";
 }
 
@@ -314,9 +317,10 @@ async function savePlayerScore(){
  if(!playerSession)return;
  const m=bundle.matches.find(x=>x.id===$("playerMatch").value),hole=Number($("playerHoleNumber").dataset.hole),gross=Number($("playerGross").value);
  if(!m||!gross||gross<1){$("playerScoreStatus").textContent="Enter your gross score.";return}
+ if(score(m.id,playerSession.playerId,hole)){$("playerScoreStatus").textContent="This hole is locked. Ask the admin to correct it if needed.";return}
  $("playerScoreStatus").textContent="Saving…";
  const args={p_player_id:playerSession.playerId,p_password:playerSession.password,p_match_id:m.id,p_hole_no:hole,p_gross_score:gross,p_drive_used:$("playerDrive").value==="yes"};
- const optimistic=()=>{const existing=(bundle.scores||[]).find(s=>s.match_id===m.id&&s.player_id===playerSession.playerId&&Number(s.hole_no)===hole);if(existing){existing.gross_score=gross;existing.drive_used=args.p_drive_used}else{bundle.scores=bundle.scores||[];bundle.scores.push({match_id:m.id,team_id:playerSession.teamId,player_id:playerSession.playerId,hole_no:hole,gross_score:gross,drive_used:args.p_drive_used,updated_at:new Date().toISOString()})}saveBundleCache();renderAll()};
+ const optimistic=()=>{bundle.scores=bundle.scores||[];if(!bundle.scores.some(s=>s.match_id===m.id&&s.player_id===playerSession.playerId&&Number(s.hole_no)===hole)){bundle.scores.push({match_id:m.id,team_id:playerSession.teamId,player_id:playerSession.playerId,hole_no:hole,gross_score:gross,drive_used:args.p_drive_used,updated_at:new Date().toISOString()})}saveBundleCache();renderAll()};
  const {error,queued}=await writeRpc("tour_player_save_score",args,{optimistic});
  if(error){$("playerScoreStatus").textContent=error.message;return}
  $("playerScoreStatus").textContent=queued?"Saved offline • will sync":"Score saved ✓";
@@ -416,7 +420,7 @@ function renderPlayerHoleStrip(){
  const current=Number($("playerHoleNumber").dataset.hole||1);
  wrap.innerHTML=Array.from({length:18},(_,i)=>{
    const h=i+1,s=score(m.id,playerSession.playerId,h);
-   return '<button type="button" class="hole-chip '+(s?'done ':'')+(h===current?'current':'')+'" data-hole="'+h+'">'+h+(s?' ✓':'')+'</button>';
+   return '<button type="button" class="hole-chip '+(s?'done locked ':'')+(h===current?'current':'')+'" data-hole="'+h+'">'+h+(s?' 🔒':'')+'</button>';
  }).join("");
  wrap.querySelectorAll(".hole-chip").forEach(b=>b.onclick=()=>{$("playerHoleNumber").dataset.touched="1";setPlayerHole(Number(b.dataset.hole));renderPlayerHoleStrip();enhancePlayerScoring()});
 }
@@ -431,11 +435,12 @@ function enhancePlayerScoring(){
    const shots=ch==null?null:holeStrokes(Math.round(ch*Number(r.handicap_allowance||100)/100),h.stroke);
    $("playerHoleMeta").textContent="Par "+h.par+" • SI "+h.stroke+(ch==null?" • CH needed":(" • CH "+ch+" • "+shots+" shot"+(shots===1?"":"s")));
  }
- const st=matchState(m),btn=$("savePlayerScore");
+ const st=matchState(m),btn=$("savePlayerScore"),saved=score(m.id,playerSession.playerId,hn);
  if(btn){
    const closed=st.complete&&hn>st.thru;
-   btn.disabled=closed;
-   if(closed){btn.textContent="Match Finished • "+st.resultText}
+   btn.disabled=closed||!!saved;
+   if(saved){btn.textContent="Hole Locked ✓"}
+   else if(closed){btn.textContent="Match Finished • "+st.resultText}
    else btn.textContent="Save & Next Hole";
  }
 }
