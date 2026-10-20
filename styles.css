@@ -138,3 +138,9 @@ button:disabled{opacity:.55;cursor:not-allowed}
  .highlight-grid{grid-template-columns:1fr}
  .tour-share-panel .section-title-row{gap:8px}.tour-share-panel button{width:100%}
 }
+
+.admin-hcp-list{display:grid;gap:7px;margin-top:10px}
+.admin-hcp-row{display:grid;grid-template-columns:minmax(0,1fr) 88px 74px;gap:7px;align-items:center}
+.admin-hcp-row input{min-height:42px}
+.admin-hcp-row button{min-height:42px;padding:7px 10px}
+@media(max-width:520px){.admin-hcp-row{grid-template-columns:minmax(0,1fr) 76px 68px;font-size:14px}}
