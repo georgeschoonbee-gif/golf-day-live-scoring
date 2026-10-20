@@ -34,3 +34,6 @@ body{background:linear-gradient(180deg,#f3f7f4 0%,#eef3f0 100%);min-height:100vh
   .club-header p{font-size:13px}
   .status-pill{font-size:12px;padding:6px 8px}
 }
+
+.tour-target,.winner-target{margin-top:12px;padding:11px 13px;border-radius:12px;background:#eef7f1;color:#064226;font-weight:800;text-align:center}
+.winner-target{margin-bottom:14px;border:1px solid #cfe3d5}
