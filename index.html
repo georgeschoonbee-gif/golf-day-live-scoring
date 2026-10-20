@@ -82,12 +82,16 @@
             <label>Round<select id="playerRound"></select></label>
             <label>Match<select id="playerMatch"></select></label>
           </div>
-          <div class="course-handicap-box">
+          <div id="courseHandicapBox" class="course-handicap-box">
             <label>Course Handicap for this round
               <input id="playerCourseHandicap" type="number" min="0" max="54" inputmode="decimal" placeholder="Enter course handicap">
             </label>
             <button id="saveCourseHandicap" class="secondary full-btn">Save Course Handicap</button>
             <p id="courseHandicapStatus" class="muted"></p>
+          </div>
+          <div id="courseHandicapSaved" class="course-handicap-saved hidden">
+            <span>Course Handicap <strong id="courseHandicapSavedValue">—</strong> ✓</span>
+            <button id="changeCourseHandicap" type="button" class="secondary">Change</button>
           </div>
           <div id="playerMatchInfo" class="match-summary"></div>
           <div class="hole-nav">
