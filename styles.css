@@ -19,3 +19,18 @@ body{background:linear-gradient(180deg,#f3f7f4 0%,#eef3f0 100%);min-height:100vh
  .player-welcome{align-items:flex-start}.score-entry{grid-template-columns:1fr}.drive-toggle select{min-height:52px}.score-input{min-height:82px}
  .player-builder{grid-template-columns:1fr 1fr}.player-builder button{grid-column:1/-1}.pbPin{grid-column:1/-1}
 }
+
+/* Mobile navigation fix */
+@media(max-width:900px){
+  .tabs{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important;overflow:visible!important}
+  .tab-btn{width:100%;min-width:0;padding:10px 5px;font-size:13px;white-space:normal;line-height:1.15}
+}
+@media(max-width:520px){
+  .tabs{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .club-header{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .brand-wrap{min-width:0}
+  .club-logo{width:72px;height:50px}
+  .club-header h1{font-size:19px;line-height:1.05}
+  .club-header p{font-size:13px}
+  .status-pill{font-size:12px;padding:6px 8px}
+}
