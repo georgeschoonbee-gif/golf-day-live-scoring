@@ -167,3 +167,25 @@ button:disabled{opacity:.55;cursor:not-allowed}
 @media (max-width:560px){
   .club-logo{width:92px!important;height:92px!important;padding:4px}
 }
+.course-handicap-saved{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin:10px 0 14px;
+  padding:9px 12px;
+  border:1px solid #cfe3d5;
+  border-radius:12px;
+  background:#f1f7f3;
+  color:#064226;
+  font-weight:800;
+}
+.course-handicap-saved button{
+  min-height:38px;
+  padding:7px 12px;
+  white-space:nowrap;
+}
+@media(max-width:560px){
+  .course-handicap-saved{font-size:14px}
+  .course-handicap-saved button{min-height:36px;font-size:13px}
+}
