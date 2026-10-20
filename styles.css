@@ -189,3 +189,35 @@ button:disabled{opacity:.55;cursor:not-allowed}
   .course-handicap-saved{font-size:14px}
   .course-handicap-saved button{min-height:36px;font-size:13px}
 }
+
+.player-round-setup{display:block}
+.assigned-match-card{
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+  margin:8px 0 14px;
+  padding:12px 14px;
+  border:1px solid #d6e5da;
+  border-radius:14px;
+  background:#f0f6f2;
+}
+.assigned-match-card strong{font-size:20px;color:#063c25}
+.assigned-match-card span{font-size:14px}
+.start-round-btn{margin-top:12px}
+.start-round-btn:disabled{opacity:.45;cursor:not-allowed}
+.round-finished{
+  margin:10px 0 14px;
+  padding:18px 16px;
+  text-align:center;
+  border:1px solid #cfe3d5;
+  border-radius:16px;
+  background:#f1f7f3;
+}
+.round-finished strong{display:block;font-size:22px;color:#064226;margin-bottom:5px}
+.round-finished span{display:block;margin-bottom:12px}
+#playerScoringArea{display:block}
+#playerScoringArea.hidden{display:none!important}
+@media(max-width:560px){
+  .assigned-match-card{padding:11px 12px}
+  .assigned-match-card strong{font-size:19px}
+}
