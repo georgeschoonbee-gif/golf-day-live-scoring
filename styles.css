@@ -61,3 +61,40 @@ body{background:linear-gradient(180deg,#f3f7f4 0%,#eef3f0 100%);min-height:100vh
  .live-player-row{grid-template-columns:minmax(0,1fr) 52px 62px}.drive-badge{grid-column:1/-1;width:max-content}
  .live-hole-strip{font-size:13px}.live-match-card{padding:12px}
 }
+
+/* Full phone-first layout + offline status */
+.header-status{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.offline-status{font-size:12px;font-weight:800;padding:5px 8px;border-radius:999px;white-space:nowrap}
+.offline-status.online{background:#e8f4ec;color:#0a5b35}
+.offline-status.pending{background:#fff2cc;color:#7a5700}
+.offline-status.offline{background:#ffe2e2;color:#8a1c1c}
+@media(max-width:900px){
+  body{font-size:16px}
+  .app-shell{max-width:none;width:100%;padding:8px}
+  .panel{padding:14px;margin-bottom:10px}
+  input,select,button{min-height:48px;font-size:16px}
+  .form-grid,.form-grid.three,.round-builder-grid,.course-holes{grid-template-columns:1fr!important}
+  .section-title-row,.match-head{flex-direction:column;align-items:stretch}
+  .compact-select{max-width:none}
+  .button-row{display:grid;grid-template-columns:1fr;gap:8px}
+  .button-row button{width:100%}
+  .score-row{grid-template-columns:1fr!important}
+  .team-builder-head,.course-builder-head{grid-template-columns:1fr}
+  .player-builder{grid-template-columns:1fr!important}
+  .player-builder button{grid-column:auto}
+  .round-card,.builder-card,.result-card,.match-card,.live-match-card{margin:8px 0}
+  details summary{padding:10px 0;font-weight:800}
+  .tabs{position:sticky;top:0;z-index:50;background:#f3f7f4;padding:6px 0;margin:8px 0}
+  .tab-btn{min-height:46px}
+}
+@media(max-width:560px){
+  .club-header{padding:9px 10px}
+  .brand-wrap{gap:9px}
+  .club-logo{width:58px;height:44px}
+  .club-header h1{font-size:18px}
+  .header-status{align-items:flex-end}
+  .status-pill,.offline-status{font-size:11px}
+  .tabs{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .live-player-row{font-size:14px}
+  .tour-score-line{font-size:18px}
+}
