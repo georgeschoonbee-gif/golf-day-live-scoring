@@ -145,8 +145,13 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .admin-hcp-row button{min-height:42px;padding:7px 10px}
 @media(max-width:520px){.admin-hcp-row{grid-template-columns:minmax(0,1fr) 76px 68px;font-size:14px}}
 
-/* reliable logo rendering */
-.club-logo,.player-login-brand img{object-fit:contain;background:#fff;display:block}
 
-/* Crop legacy grey strip out of the Jacobsdal logo asset */
-.club-logo,.login-brand img{object-fit:cover!important;object-position:50% 0!important;padding:0!important;background:#fff!important;overflow:hidden}
+/* Fresh Jacobsdal logo reset: use original artwork without crop or distortion */
+.club-logo,.login-brand img,.player-login-brand img{
+  object-fit:contain!important;
+  object-position:center!important;
+  background:#fff!important;
+  padding:5px!important;
+  display:block!important;
+  overflow:visible!important;
+}
