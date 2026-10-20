@@ -147,3 +147,6 @@ button:disabled{opacity:.55;cursor:not-allowed}
 
 /* reliable logo rendering */
 .club-logo,.player-login-brand img{object-fit:contain;background:#fff;display:block}
+
+/* Crop legacy grey strip out of the Jacobsdal logo asset */
+.club-logo,.login-brand img{object-fit:cover!important;object-position:50% 0!important;padding:0!important;background:#fff!important;overflow:hidden}
