@@ -1,5 +1,5 @@
-const CACHE="jacobsdal-golf-tour-v6";
-const CORE=["./","./index.html","./styles.css","./app.js","./manifest.webmanifest","./apple-touch-icon.png","./jacobsdal-logo.jpg"];
+const CACHE="jacobsdal-golf-tour-v7";
+const CORE=["./","./index.html","./styles.css","./app.js","./manifest.webmanifest","./apple-touch-icon.png","./jacobsdal-logo-clean.svg"];
 self.addEventListener("install",event=>{
   event.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting()));
 });
