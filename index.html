@@ -1,284 +1,75 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Golf Day Live Scoring</title>
-  <link rel="stylesheet" href="styles.css" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Golf Team Tour</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="app-shell">
-    <header class="topbar">
-      <div>
-        <h1>Golf Day Live Scoring</h1>
-        <p id="eventSubtitle">Loading tournament…</p>
+<div class="app-shell">
+  <header class="topbar">
+    <div><h1>Golf Team Tour</h1><p id="eventSubtitle">Loading tournament…</p></div>
+    <span id="connectionStatus" class="status-pill">Connecting…</span>
+  </header>
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="home">Tour</button>
+    <button class="tab-btn" data-tab="matches">Matches</button>
+    <button class="tab-btn" data-tab="leaderboard">Leaderboard</button>
+    <button class="tab-btn" data-tab="captain">Captain</button>
+    <button class="tab-btn" data-tab="final">Final Results</button>
+    <button class="tab-btn" data-tab="admin">Admin</button>
+  </nav>
+  <main>
+    <section id="home" class="tab-panel active">
+      <div id="tourScoreHero" class="tour-score-hero"></div>
+      <div class="panel"><h2>Rounds</h2><div id="roundCards" class="round-grid"></div></div>
+    </section>
+    <section id="matches" class="tab-panel">
+      <div class="panel">
+        <div class="section-title-row"><div><h2>Live Matches</h2><p class="muted">Pairings appear once both captains submit.</p></div><select id="matchRoundSelect" class="compact-select"></select></div>
+        <div id="matchList"></div>
       </div>
-      <div class="status-pill" id="connectionStatus">Connecting…</div>
-    </header>
-
-    <nav class="tabs">
-      <button data-tab="home" class="tab-btn active">Home</button>
-      <button data-tab="scores" class="tab-btn">Scores</button>
-      <button data-tab="leaderboard" class="tab-btn">Leaderboard</button>
-      <button data-tab="final" class="tab-btn">Final Results</button>
-      <button data-tab="captain" class="tab-btn">Captain Login</button>
-      <button data-tab="admin" class="tab-btn">Admin</button>
-    </nav>
-
-    <main>
-      <section id="home" class="tab-panel active">
-        <div class="metrics">
-          <div class="metric"><span>Competition</span><strong id="homeCompetition">—</strong></div>
-          <div class="metric"><span>Course</span><strong id="homeCourse">—</strong></div>
-          <div class="metric"><span>Teams</span><strong id="homeTeams">—</strong></div>
-          <div class="metric"><span>Handicap allowance</span><strong id="homeAllowance">—</strong></div>
+    </section>
+    <section id="leaderboard" class="tab-panel"><div class="panel"><h2>Tour Leaderboard</h2><div id="leaderboardBody"></div></div></section>
+    <section id="captain" class="tab-panel">
+      <div id="captainLoginPanel" class="panel narrow">
+        <h2>Captain Login</h2><label>Team<select id="captainTeam"></select></label><label>Password<input id="captainPassword" type="password"></label>
+        <div class="button-row"><button id="captainLogin">Sign In</button><button id="captainLogout" class="secondary hidden">Sign Out</button></div><p id="captainStatus" class="muted"></p>
+      </div>
+      <div id="captainWorkspace" class="hidden">
+        <div class="panel"><h2>Next Round Pairings</h2><p class="muted">Select only your own team. The other captain's line-up stays hidden until both submit.</p>
+          <label>Round<select id="captainRoundSelect"></select></label><div id="lineupEditor"></div>
+          <div class="button-row"><button id="submitLineup">Submit / Update Line-up</button></div><p id="lineupStatus" class="muted"></p>
         </div>
-
-        <div class="panel">
-          <h2>Competition format</h2>
-          <p id="homeFormat">—</p>
-          <p class="muted">Players and spectators can view scores. Only the team captain can enter or change that team's scores.</p>
+        <div class="panel"><h2>Enter Match Scores</h2>
+          <div class="form-grid three"><label>Round<select id="captainScoreRound"></select></label><label>Match<select id="captainMatchSelect"></select></label><label>Hole<select id="captainHoleSelect"></select></label></div>
+          <div id="captainScoreRows"></div><div class="button-row"><button id="saveCaptainScores">Save Scores</button></div><p id="captainScoreStatus" class="muted"></p>
         </div>
-
-        <div class="panel">
-          <h2>View a team</h2>
-          <div class="form-grid two">
-            <label>Team
-              <select id="viewerTeam"></select>
-            </label>
-            <div class="button-row align-end">
-              <button id="viewTeamScorecard" class="secondary">View Scorecard</button>
-            </div>
-          </div>
-          <div id="viewerScorecard"></div>
+      </div>
+    </section>
+    <section id="final" class="tab-panel"><div class="panel"><div class="section-title-row"><div><h2>Final Results</h2><p class="muted">Overall team match points with each round's contribution.</p></div><button id="downloadPdf">Download PDF</button></div><div id="finalResults"></div></div></section>
+    <section id="admin" class="tab-panel">
+      <div id="adminLoginPanel" class="panel narrow"><h2>Admin Login</h2><label>Password<input id="adminPassword" type="password"></label><div class="button-row"><button id="adminLogin">Unlock Admin</button><button id="adminLogout" class="secondary hidden">Lock Admin</button></div><p id="adminStatus" class="muted"></p></div>
+      <div id="adminWorkspace" class="hidden">
+        <div class="panel"><div class="section-title-row"><div><h2>Current Tour</h2><p class="muted">Round formats can be changed until scoring starts.</p></div><button id="startNewTour" class="secondary">Create New Tour</button></div><div id="currentRoundAdmin"></div></div>
+        <div id="newTourBuilder" class="panel hidden">
+          <h2>New Tour Setup</h2><label>Tour name<input id="tourName" value="Golf Tour"></label>
+          <div class="section-title-row"><h3>Teams</h3><button id="addTeam" class="secondary">+ Add Team</button></div><div id="teamBuilder"></div>
+          <div class="section-title-row"><h3>Courses</h3><button id="addCourse" class="secondary">+ Add Course</button></div><div id="courseBuilder"></div>
+          <div class="section-title-row"><h3>Rounds</h3><button id="addRound" class="secondary">+ Add Round</button></div><div id="roundBuilder"></div>
+          <div class="button-row"><button id="createTour">Create Live Tour</button></div><p id="createTourStatus" class="muted"></p>
         </div>
-      </section>
-
-      <section id="scores" class="tab-panel">
-        <div class="panel">
-          <div id="scoreAccessNotice" class="notice">
-            Captain login is required to enter scores. Everyone can still view the scorecard below.
-          </div>
-
-          <div class="form-grid two">
-            <label>Team
-              <select id="scoreTeam"></select>
-            </label>
-            <label>Hole
-              <select id="scoreHole"></select>
-            </label>
-          </div>
-
-          <div class="hole-header">
-            <div>
-              <h2 id="holeTitle">Hole 1</h2>
-              <p id="holeMeta" class="muted">—</p>
-            </div>
-            <div class="status-pill" id="holeTeamPoints">Team: 0 pts</div>
-          </div>
-
-          <div id="playerScoreRows"></div>
-
-          <div class="button-row">
-            <button id="prevHole" class="secondary">← Previous</button>
-            <button id="saveHole">Save Hole</button>
-            <button id="nextHole" class="secondary">Next →</button>
-          </div>
-          <div id="saveStatus" class="muted"></div>
+        <div class="panel"><h2>Admin Score Correction</h2>
+          <div class="form-grid three"><label>Round<select id="adminScoreRound"></select></label><label>Match<select id="adminScoreMatch"></select></label><label>Hole<select id="adminScoreHole"></select></label></div>
+          <div id="adminScoreRows"></div><div class="button-row"><button id="saveAdminScores">Save Corrections</button></div><p id="adminScoreStatus" class="muted"></p>
         </div>
-      </section>
-
-      <section id="leaderboard" class="tab-panel">
-        <div class="panel">
-          <div class="section-title-row">
-            <div>
-              <h2>Live Leaderboard</h2>
-              <p class="muted">Updates from the shared Supabase database.</p>
-            </div>
-            <button id="refreshLeaderboard" class="secondary">Refresh</button>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr><th>Pos</th><th>Team</th><th>Thru</th><th id="leaderValueHeader">Points</th></tr>
-              </thead>
-              <tbody id="leaderboardBody"></tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-
-      <section id="final" class="tab-panel">
-        <div class="panel">
-          <div class="section-title-row">
-            <div>
-              <h2>Final Results</h2>
-              <p class="muted">Teams are ranked from first to last. Player totals are shown under each team.</p>
-            </div>
-            <button id="downloadResultsPdf">Download Results PDF</button>
-          </div>
-          <div id="finalResultsList"></div>
-        </div>
-      </section>
-
-      <section id="captain" class="tab-panel">
-        <div class="panel captain-login">
-          <h2>Team Captain Login</h2>
-          <p class="muted">Choose your team and enter the password created by the tournament admin.</p>
-          <label>Team
-            <select id="captainTeam"></select>
-          </label>
-          <label>Captain password
-            <input id="captainPassword" type="password" autocomplete="current-password" />
-          </label>
-          <div class="button-row">
-            <button id="captainLogin">Sign In</button>
-            <button id="captainLogout" class="secondary hidden">Sign Out</button>
-          </div>
-          <div id="captainLoginStatus" class="muted"></div>
-        </div>
-
-        <div id="captainSession" class="panel hidden">
-          <h2>Captain access active</h2>
-          <p id="captainSessionText"></p>
-          <button id="goToScores">Enter Team Scores</button>
-        </div>
-      </section>
-
-      <section id="admin" class="tab-panel">
-        <div id="adminLocked" class="panel admin-login">
-          <h2>Admin Login</h2>
-          <p class="muted">Admin password: use your tournament admin password.</p>
-          <label>Password
-            <input id="adminPassword" type="password" autocomplete="current-password" />
-          </label>
-          <div class="button-row">
-            <button id="adminLogin">Unlock Admin</button>
-          </div>
-          <div id="adminLoginStatus" class="muted"></div>
-        </div>
-
-        <div id="adminContent" class="hidden">
-          <div class="panel">
-            <div class="section-title-row">
-              <h2>Competition Setup</h2>
-              <button id="adminLogout" class="secondary">Lock Admin</button>
-            </div>
-
-            <div class="form-grid two">
-              <label>Competition name
-                <input id="competitionName" value="Golf Day Championship" />
-              </label>
-
-              <label>Scoring type
-                <select id="scoringType">
-                  <option value="scramble4">Scramble Drive + Individual IPS</option>
-                  <option value="alliance">4-Ball Alliance</option>
-                  <option value="betterball">Betterball Stableford</option>
-                  <option value="individual">Individual Stableford</option>
-                  <option value="stroke">Stroke Play</option>
-                  <option value="betterballStroke">Betterball Stroke Play</option>
-                  <option value="texas">Texas Scramble</option>
-                </select>
-              </label>
-
-              <label>Scores to count
-                <select id="scoresToCount">
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4" selected>4</option>
-                </select>
-              </label>
-
-              <label>Handicap allowance %
-                <input id="handicapAllowance" type="number" min="0" max="100" value="100" />
-              </label>
-
-              <label>Minimum selected drives per player
-                <input id="minDrives" type="number" min="0" max="18" value="0" />
-              </label>
-            </div>
-          </div>
-
-          <div class="panel">
-            <h2>Course</h2>
-            <div class="form-grid two">
-              <label>Course name
-                <input id="courseName" placeholder="e.g. Jacobsdal Golf Club" />
-              </label>
-            </div>
-
-            <div class="table-wrap">
-              <table>
-                <thead><tr><th>Hole</th><th>Par</th><th>Stroke Index</th></tr></thead>
-                <tbody id="courseEditor"></tbody>
-              </table>
-            </div>
-          </div>
-
-          <div class="panel">
-            <div class="section-title-row">
-              <div>
-                <h2>Teams & Players</h2>
-                <p class="muted">2–18 teams, 4 players per team. Set a captain and a password for every team.</p>
-              </div>
-              <button id="addTeam" class="secondary">+ Add Team</button>
-            </div>
-            <div id="teamEditor"></div>
-          </div>
-
-
-          <div class="panel">
-            <h2>Admin Score Correction</h2>
-            <p class="muted">Correct any team score without needing the captain password.</p>
-
-            <div class="form-grid two">
-              <label>Team
-                <select id="adminCorrectionTeam"></select>
-              </label>
-              <label>Hole
-                <select id="adminCorrectionHole"></select>
-              </label>
-            </div>
-
-            <div class="hole-header">
-              <div>
-                <h3 id="adminCorrectionTitle">Hole 1</h3>
-                <p id="adminCorrectionMeta" class="muted">—</p>
-              </div>
-              <div class="status-pill" id="adminCorrectionTeamPoints">Team: 0 pts</div>
-            </div>
-
-            <div id="adminCorrectionRows"></div>
-
-            <div class="button-row">
-              <button id="saveAdminCorrection">Save Corrected Scores</button>
-            </div>
-            <div id="adminCorrectionStatus" class="muted"></div>
-          </div>
-
-          <div class="panel">
-            <h2>Publish Tournament</h2>
-            <p class="muted">Publishing sends the course, teams, players and captain passwords to Supabase so all phones use the same tournament.</p>
-            <div class="notice danger-note">
-              Publishing an existing tournament currently resets its scores. Do this before play starts.
-            </div>
-            <div class="button-row">
-              <button id="publishTournament">Publish to Live Database</button>
-              <button id="resetScores" class="danger">Reset All Scores</button>
-            </div>
-            <div id="publishStatus" class="muted"></div>
-          </div>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
-  <script src="app.js"></script>
+      </div>
+    </section>
+  </main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
