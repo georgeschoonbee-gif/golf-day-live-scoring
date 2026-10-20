@@ -406,9 +406,22 @@ function renderAdminTourControl(){
  el.innerHTML=bundle.rounds.map(r=>{
    const ms=matchesForRound(r.id),done=ms.filter(m=>matchState(m).complete).length;
    const pairedPlayers=[...new Set(ms.flatMap(m=>m.players.map(mp=>mp.player_id)))];
-   const missing=pairedPlayers.filter(pid=>dailyCourseHandicap(pid,r.id)==null).map(pid=>player(pid)?.name).filter(Boolean);
-   return '<div class="admin-round-control"><div><strong>'+esc(r.name)+' • '+esc(course(r.course_id)?.name||"")+'</strong><small>'+esc(formatLabel(r.format_code))+'</small></div><span class="mini-pill">'+done+'/'+ms.length+' finished</span><span class="mini-pill '+(missing.length?'warn':'ok')+'">'+(missing.length?(missing.length+' CH missing'):'All CH entered')+'</span>'+(missing.length?'<details><summary>Missing handicaps</summary><div class="small">'+missing.map(esc).join(", ")+'</div></details>':'')+'</div>';
+   const missing=pairedPlayers.filter(pid=>dailyCourseHandicap(pid,r.id)==null);
+   const hcpRows=pairedPlayers.map(pid=>{const p=player(pid),ch=dailyCourseHandicap(pid,r.id);return '<div class="admin-hcp-row"><span>'+esc(p?.name||"Player")+'</span><input class="adminDailyHcp" data-round="'+r.id+'" data-player="'+pid+'" type="number" min="0" max="54" inputmode="decimal" value="'+(ch??'')+'" placeholder="CH"><button type="button" class="saveAdminDailyHcp secondary" data-round="'+r.id+'" data-player="'+pid+'">Save</button></div>'}).join("");
+   return '<div class="admin-round-control"><div><strong>'+esc(r.name)+' • '+esc(course(r.course_id)?.name||"")+'</strong><small>'+esc(formatLabel(r.format_code))+'</small></div><span class="mini-pill">'+done+'/'+ms.length+' finished</span><span class="mini-pill '+(missing.length?'warn':'ok')+'">'+(missing.length?(missing.length+' CH missing'):'All CH entered')+'</span><details><summary>Course handicaps</summary><div class="admin-hcp-list">'+hcpRows+'</div></details></div>';
  }).join("");
+ el.querySelectorAll(".saveAdminDailyHcp").forEach(b=>b.onclick=saveAdminDailyHcp);
+}
+async function saveAdminDailyHcp(e){
+ const b=e.currentTarget,rid=b.dataset.round,pid=b.dataset.player;
+ const input=document.querySelector('.adminDailyHcp[data-round="'+rid+'"][data-player="'+pid+'"]');
+ const val=Number(input?.value);
+ if(Number.isNaN(val)||val<0||val>54){notifyUser("Enter a Course Handicap from 0 to 54");return}
+ b.disabled=true;b.textContent="Saving…";
+ const {error}=await writeRpc("tour_admin_set_course_handicap",{p_admin_password:adminPass,p_player_id:pid,p_round_id:rid,p_course_handicap:val},{queueWhenOffline:false});
+ b.disabled=false;b.textContent="Save";
+ if(error){notifyUser(error.message);return}
+ notifyUser("Course Handicap saved ✓");await load();
 }
 
 function playerStats(){
@@ -480,7 +493,15 @@ const _renderHome=renderHome;
 renderHome=function(){_renderHome();renderTourHighlights();renderTourQr()};
 
 const _renderPlayer=renderPlayer;
-renderPlayer=function(){_renderPlayer();if(playerSession)enhancePlayerScoring()};
+renderPlayer=function(){
+ _renderPlayer();
+ if(playerSession&&bundle&&$("playerRound")){
+   const today=new Date().toISOString().slice(0,10);
+   const todays=bundle.rounds.find(r=>r.play_date===today&&matchesForRound(r.id).some(m=>m.players.some(mp=>mp.player_id===playerSession.playerId)));
+   if(todays&&$("playerRound").value!==todays.id){$("playerRound").value=todays.id;renderPlayerMatches()}
+   enhancePlayerScoring();
+ }
+};
 
 const _setPlayerHole=setPlayerHole;
 setPlayerHole=function(n){_setPlayerHole(n);enhancePlayerScoring()};
@@ -495,7 +516,19 @@ renderAdmin=function(){_renderAdmin();renderAdminTourControl()};
 if($("scoreMinus"))$("scoreMinus").onclick=()=>adjustGross(-1);
 if($("scorePlus"))$("scorePlus").onclick=()=>adjustGross(1);
 if($("savePlayerScore"))$("savePlayerScore").onclick=enhancedSavePlayerScore;
+async function shareResults(){
+ if(!bundle)return;
+ const pts=overallPoints(),winner=tourWinner();
+ const lines=[bundle.event.name,winner?("🏆 "+winner.name+" wins "+pts[winner.id]+" points"):("Live standings • "+pointsToWin()+" points wins")];
+ bundle.teams.slice().sort((a,b)=>(pts[b.id]||0)-(pts[a.id]||0)).forEach(t=>lines.push(t.name+": "+(pts[t.id]||0)+" pts"));
+ const text=lines.join("\n"),url=publicTourUrl();
+ try{
+   if(navigator.share)await navigator.share({title:bundle.event.name+" Results",text,url});
+   else{await navigator.clipboard.writeText(text+"\n"+url);notifyUser("Results copied to clipboard");}
+ }catch(e){}
+}
 if($("shareLiveTour"))$("shareLiveTour").onclick=shareLiveTour;
+if($("shareResults"))$("shareResults").onclick=shareResults;
 if($("syncNow"))$("syncNow").onclick=async()=>{notifyUser(navigator.onLine?"Syncing…":"Still offline • scores remain safe on this phone");await flushQueue();updateSyncStatus();if(navigator.onLine)notifyUser(getQueue().length?"Some items still waiting":"All scores synced ✓")};
 if($("captainRefresh"))$("captainRefresh").onclick=async()=>{await load();renderCaptainDashboard()};
 if($("adminRefresh"))$("adminRefresh").onclick=async()=>{await load();renderAdminTourControl()};
