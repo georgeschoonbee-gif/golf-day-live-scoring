@@ -184,7 +184,7 @@ function playerLogout(){playerSession=null;localStorage.removeItem(PLAYER_SESSIO
 function renderPlayerMatches(){
  if(!playerSession)return;
  const rid=$("playerRound").value,ms=matchesForRound(rid).filter(m=>m.players.some(mp=>mp.player_id===playerSession.playerId));
- const ch=(bundle?.course_handicaps||[]).find(x=>x.player_id===playerSession.playerId&&x.round_id===rid);if($("playerCourseHandicap"))$("playerCourseHandicap").value=ch?.course_handicap??"";
+ const ch=(bundle?.course_handicaps||[]).find(x=>x.player_id===playerSession.playerId&&x.round_id===rid);if($("playerCourseHandicap"))$("playerCourseHandicap").value=ch?.course_handicap??"";updateCourseHandicapUi();
  const el=$("playerMatch"),old=el.value;el.innerHTML="";
  ms.forEach(m=>el.add(new Option("Match "+m.match_no,m.id)));
  if([...el.options].some(o=>o.value===old))el.value=old;
@@ -218,6 +218,20 @@ function setPlayerHole(n){
  }else $("playerHoleResult").textContent="No score saved for this hole yet.";
 }
 
+function updateCourseHandicapUi(forceEdit=false){
+ const box=$("courseHandicapBox"),saved=$("courseHandicapSaved"),valEl=$("courseHandicapSavedValue");
+ if(!box||!saved||!playerSession||!bundle)return;
+ const rid=$("playerRound")?.value;
+ const ch=(bundle.course_handicaps||[]).find(x=>x.player_id===playerSession.playerId&&x.round_id===rid);
+ const has=ch!=null&&ch.course_handicap!=null&&ch.course_handicap!=="";
+ box.classList.toggle("hidden",has&&!forceEdit);
+ saved.classList.toggle("hidden",!has||forceEdit);
+ if(has&&valEl)valEl.textContent=ch.course_handicap;
+}
+function editCourseHandicap(){
+ updateCourseHandicapUi(true);
+ setTimeout(()=>$("playerCourseHandicap")?.focus(),50);
+}
 async function saveCourseHandicap(){
  if(!playerSession)return;
  const rid=$("playerRound").value,val=Number($("playerCourseHandicap").value);
@@ -228,7 +242,8 @@ async function saveCourseHandicap(){
  const {error,queued}=await writeRpc("tour_player_set_course_handicap",args,{optimistic});
  if(error){$("courseHandicapStatus").textContent=error.message;return}
  $("courseHandicapStatus").textContent=queued?"Saved offline • will sync":"Course handicap saved ✓";
- if(!queued)await load();
+ updateCourseHandicapUi();
+ if(!queued){await load();updateCourseHandicapUi()}
 }
 async function savePlayerScore(){
  if(!playerSession)return;
@@ -311,7 +326,7 @@ function validateDraft(){if(draft.teams.length<2)return"Add at least two teams."
 async function createTour(){syncDraft();const err=validateDraft();if(err)return $("createTourStatus").textContent=err;draft.teams.forEach((t,i)=>t.display_order=i+1);draft.courses.forEach((c,i)=>c.display_order=i+1);draft.rounds.forEach((r,i)=>r.round_no=i+1);if(!navigator.onLine)return $("createTourStatus").textContent="Creating a new live tour requires signal. Your draft is still saved on this phone.";const {error}=await db.rpc("tour_admin_create_event",{p_admin_password:adminPass,p_payload:draft});if(error)return $("createTourStatus").textContent=error.message;$("createTourStatus").textContent="Tour created.";$("newTourBuilder").classList.add("hidden");await load()}
 function downloadPdf(){if(!bundle)return;const{jsPDF}=window.jspdf,doc=new jsPDF(),overall=overallPoints(),rows=bundle.teams.map(t=>({t,pts:overall[t.id]||0})).sort((a,b)=>b.pts-a.pts);doc.setFontSize(18);doc.text(bundle.event.name,14,16);let y=28;for(const[xi,x]of rows.entries()){doc.setFontSize(13);doc.text(`${xi+1}. ${x.t.name} — ${x.pts} points`,14,y);y+=7;doc.setFontSize(9);for(const r of bundle.rounds){doc.text(`${r.name} (${course(r.course_id)?.name||""}): ${roundPoints(r.id)[x.t.id]||0} points`,18,y);y+=5}y+=5;if(y>275){doc.addPage();y=18}}doc.save(`${bundle.event.name.replace(/[^a-z0-9]+/gi,"-")}-Results.pdf`)}
 
-$("homeLiveRound").onchange=renderHomeLiveScoring;$("matchRoundSelect").onchange=renderMatches;$("playerTeam").onchange=populatePlayerNames;$("playerLogin").onclick=playerLogin;$("playerLogout").onclick=playerLogout;$("playerWorkspaceLogout").onclick=playerLogout;$("playerRound").onchange=renderPlayerMatches;$("saveCourseHandicap").onclick=saveCourseHandicap;$("playerMatch").onchange=()=>{$("playerHoleNumber").dataset.touched="";renderPlayerMatches()};$("playerPrevHole").onclick=()=>{$("playerHoleNumber").dataset.touched="1";setPlayerHole(Number($("playerHoleNumber").dataset.hole||1)-1)};$("playerNextHole").onclick=()=>{$("playerHoleNumber").dataset.touched="1";setPlayerHole(Number($("playerHoleNumber").dataset.hole||1)+1)};$("savePlayerScore").onclick=savePlayerScore;$("captainLogin").onclick=captainLogin;$("captainLogout").onclick=()=>{captain=null;localStorage.removeItem(CAPTAIN_SESSION_KEY);renderCaptain()};$("captainRoundSelect").onchange=renderLineupEditor;$("submitLineup").onclick=submitLineup;$("captainScoreRound").onchange=renderCaptainMatchSelect;$("captainMatchSelect").onchange=renderCaptainScoreRows;$("captainHoleSelect").onchange=renderCaptainScoreRows;$("saveCaptainScores").onclick=saveCaptainScores;$("adminPinTeam").onchange=renderAdminPinPlayers;$("savePlayerPin").onclick=saveAdminPlayerPin;$("adminLogin").onclick=adminLogin;$("adminLogout").onclick=()=>{adminUnlocked=false;adminPass="";renderAdmin()};$("startNewTour").onclick=()=>{$("newTourBuilder").classList.toggle("hidden");renderBuilders()};$("addTeam").onclick=()=>{syncDraft();const n=draft.teams.length+1;draft.teams.push({key:`team${Date.now()}`,name:`Team ${n}`,captain_name:"",captain_password:"",players:[]});renderBuilders()};$("addCourse").onclick=()=>{syncDraft();draft.courses.push({key:`course${Date.now()}`,name:`Course ${draft.courses.length+1}`,holes:clone(defaultHoles)});renderBuilders()};$("addRound").onclick=()=>{syncDraft();draft.rounds.push({round_no:draft.rounds.length+1,name:`Day ${draft.rounds.length+1}`,play_date:"",course_key:draft.courses[0]?.key||"",team_a_key:draft.teams[0]?.key||"",team_b_key:draft.teams[1]?.key||"",format_code:"singles_match_play",players_per_side:1,match_count:1,scores_to_count:1,handicap_allowance:100,handicap_method:"off_lowest",min_drives:0});renderBuilders()};$("saveTourDraft").onclick=saveDraft;$("createTour").onclick=createTour;$("adminScoreRound").onchange=renderAdminMatchSelect;$("adminScoreMatch").onchange=renderAdminScoreRows;$("adminScoreHole").onchange=renderAdminScoreRows;$("saveAdminScores").onclick=saveAdminScores;$("downloadPdf").onclick=downloadPdf;
+$("homeLiveRound").onchange=renderHomeLiveScoring;$("matchRoundSelect").onchange=renderMatches;$("playerTeam").onchange=populatePlayerNames;$("playerLogin").onclick=playerLogin;$("playerLogout").onclick=playerLogout;$("playerWorkspaceLogout").onclick=playerLogout;$("playerRound").onchange=renderPlayerMatches;$("saveCourseHandicap").onclick=saveCourseHandicap;if($("changeCourseHandicap"))$("changeCourseHandicap").onclick=editCourseHandicap;$("playerMatch").onchange=()=>{$("playerHoleNumber").dataset.touched="";renderPlayerMatches()};$("playerPrevHole").onclick=()=>{$("playerHoleNumber").dataset.touched="1";setPlayerHole(Number($("playerHoleNumber").dataset.hole||1)-1)};$("playerNextHole").onclick=()=>{$("playerHoleNumber").dataset.touched="1";setPlayerHole(Number($("playerHoleNumber").dataset.hole||1)+1)};$("savePlayerScore").onclick=savePlayerScore;$("captainLogin").onclick=captainLogin;$("captainLogout").onclick=()=>{captain=null;localStorage.removeItem(CAPTAIN_SESSION_KEY);renderCaptain()};$("captainRoundSelect").onchange=renderLineupEditor;$("submitLineup").onclick=submitLineup;$("captainScoreRound").onchange=renderCaptainMatchSelect;$("captainMatchSelect").onchange=renderCaptainScoreRows;$("captainHoleSelect").onchange=renderCaptainScoreRows;$("saveCaptainScores").onclick=saveCaptainScores;$("adminPinTeam").onchange=renderAdminPinPlayers;$("savePlayerPin").onclick=saveAdminPlayerPin;$("adminLogin").onclick=adminLogin;$("adminLogout").onclick=()=>{adminUnlocked=false;adminPass="";renderAdmin()};$("startNewTour").onclick=()=>{$("newTourBuilder").classList.toggle("hidden");renderBuilders()};$("addTeam").onclick=()=>{syncDraft();const n=draft.teams.length+1;draft.teams.push({key:`team${Date.now()}`,name:`Team ${n}`,captain_name:"",captain_password:"",players:[]});renderBuilders()};$("addCourse").onclick=()=>{syncDraft();draft.courses.push({key:`course${Date.now()}`,name:`Course ${draft.courses.length+1}`,holes:clone(defaultHoles)});renderBuilders()};$("addRound").onclick=()=>{syncDraft();draft.rounds.push({round_no:draft.rounds.length+1,name:`Day ${draft.rounds.length+1}`,play_date:"",course_key:draft.courses[0]?.key||"",team_a_key:draft.teams[0]?.key||"",team_b_key:draft.teams[1]?.key||"",format_code:"singles_match_play",players_per_side:1,match_count:1,scores_to_count:1,handicap_allowance:100,handicap_method:"off_lowest",min_drives:0});renderBuilders()};$("saveTourDraft").onclick=saveDraft;$("createTour").onclick=createTour;$("adminScoreRound").onchange=renderAdminMatchSelect;$("adminScoreMatch").onchange=renderAdminScoreRows;$("adminScoreHole").onchange=renderAdminScoreRows;$("saveAdminScores").onclick=saveAdminScores;$("downloadPdf").onclick=downloadPdf;
 restoreDraft();if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(console.warn)}updateSyncStatus();db.channel("tour-live").on("postgres_changes",{event:"*",schema:"public",table:"tour_hole_scores"},load).on("postgres_changes",{event:"*",schema:"public",table:"tour_matches"},load).subscribe();load();
 
 /* === Jacobsdal Tour phone-first enhancements === */
