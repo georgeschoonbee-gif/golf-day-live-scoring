@@ -221,3 +221,7 @@ button:disabled{opacity:.55;cursor:not-allowed}
   .assigned-match-card{padding:11px 12px}
   .assigned-match-card strong{font-size:19px}
 }
+
+/* Legacy captain score panel hard-hide */
+.panel:has(#captainScoreRound){display:none!important}
+#captainScoreRound,#captainMatchSelect,#captainHoleSelect,#captainScoreRows,#saveCaptainScores,#captainScoreStatus{display:none!important}
