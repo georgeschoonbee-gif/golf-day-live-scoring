@@ -8,14 +8,18 @@
 </head>
 <body>
 <div class="app-shell">
-  <header class="topbar">
-    <div><h1>Golf Team Tour</h1><p id="eventSubtitle">Loading tournament…</p></div>
+  <header class="topbar club-header">
+    <div class="brand-wrap">
+      <img src="jacobsdal-logo.svg" class="club-logo" alt="Jacobsdal Gholfklub">
+      <div><h1>Jacobsdal Golf Tour</h1><p id="eventSubtitle">Loading tournament…</p></div>
+    </div>
     <span id="connectionStatus" class="status-pill">Connecting…</span>
   </header>
   <nav class="tabs">
     <button class="tab-btn active" data-tab="home">Tour</button>
     <button class="tab-btn" data-tab="matches">Matches</button>
     <button class="tab-btn" data-tab="leaderboard">Leaderboard</button>
+    <button class="tab-btn player-tab" data-tab="player">My Score</button>
     <button class="tab-btn" data-tab="captain">Captain</button>
     <button class="tab-btn" data-tab="final">Final Results</button>
     <button class="tab-btn" data-tab="admin">Admin</button>
@@ -32,6 +36,47 @@
       </div>
     </section>
     <section id="leaderboard" class="tab-panel"><div class="panel"><h2>Tour Leaderboard</h2><div id="leaderboardBody"></div></div></section>
+    <section id="player" class="tab-panel">
+      <div id="playerLoginPanel" class="panel mobile-card">
+        <div class="login-brand"><img src="jacobsdal-logo.svg" alt="Jacobsdal Gholfklub"><div><h2>Player Scoring</h2><p class="muted">Log in and enter only your own score.</p></div></div>
+        <label>Team<select id="playerTeam"></select></label>
+        <label>Player<select id="playerName"></select></label>
+        <label>Player PIN / password<input id="playerPassword" type="password" inputmode="numeric" autocomplete="current-password"></label>
+        <button id="playerLogin" class="full-btn">Start Scoring</button>
+        <button id="playerLogout" class="secondary full-btn hidden">Sign Out</button>
+        <p id="playerLoginStatus" class="muted"></p>
+      </div>
+      <div id="playerWorkspace" class="hidden">
+        <div class="player-welcome">
+          <div><div class="eyebrow">LIVE SCORECARD</div><h2 id="playerWelcome">My Score</h2><p id="playerTeamLabel" class="muted"></p></div>
+          <button id="playerWorkspaceLogout" class="secondary">Sign Out</button>
+        </div>
+        <div class="panel mobile-score-card">
+          <div class="form-grid two mobile-selects">
+            <label>Round<select id="playerRound"></select></label>
+            <label>Match<select id="playerMatch"></select></label>
+          </div>
+          <div id="playerMatchInfo" class="match-summary"></div>
+          <div class="hole-nav">
+            <button id="playerPrevHole" class="secondary hole-nav-btn">←</button>
+            <div class="hole-big"><span>Hole</span><strong id="playerHoleNumber">1</strong><small id="playerHoleMeta">Par — • SI —</small></div>
+            <button id="playerNextHole" class="secondary hole-nav-btn">→</button>
+          </div>
+          <div class="score-entry">
+            <label>Your gross score
+              <input id="playerGross" class="score-input" type="number" min="1" max="20" inputmode="numeric" placeholder="0">
+            </label>
+            <label id="playerDriveWrap" class="drive-toggle">Drive selected
+              <select id="playerDrive"><option value="">No</option><option value="yes">Yes</option></select>
+            </label>
+          </div>
+          <div id="playerHoleResult" class="hole-result"></div>
+          <button id="savePlayerScore" class="full-btn score-save-btn">Save My Score</button>
+          <p id="playerScoreStatus" class="muted center"></p>
+        </div>
+      </div>
+    </section>
+
     <section id="captain" class="tab-panel">
       <div id="captainLoginPanel" class="panel narrow">
         <h2>Captain Login</h2><label>Team<select id="captainTeam"></select></label><label>Password<input id="captainPassword" type="password"></label>
@@ -53,6 +98,7 @@
       <div id="adminLoginPanel" class="panel narrow"><h2>Admin Login</h2><label>Password<input id="adminPassword" type="password"></label><div class="button-row"><button id="adminLogin">Unlock Admin</button><button id="adminLogout" class="secondary hidden">Lock Admin</button></div><p id="adminStatus" class="muted"></p></div>
       <div id="adminWorkspace" class="hidden">
         <div class="panel"><div class="section-title-row"><div><h2>Current Tour</h2><p class="muted">Round formats can be changed until scoring starts.</p></div><button id="startNewTour" class="secondary">Create New Tour</button></div><div id="currentRoundAdmin"></div></div>
+        <div class="panel"><h2>Player Login PINs</h2><p class="muted">Set or reset a player's scoring PIN. Minimum 4 characters.</p><div class="form-grid three"><label>Team<select id="adminPinTeam"></select></label><label>Player<select id="adminPinPlayer"></select></label><label>New PIN<input id="adminPinValue" type="text" inputmode="numeric" placeholder="e.g. 1234"></label></div><button id="savePlayerPin">Save Player PIN</button><p id="adminPinStatus" class="muted"></p></div>
         <div id="newTourBuilder" class="panel hidden">
           <h2>New Tour Setup</h2><label>Tour name<input id="tourName" value="Golf Tour"></label>
           <div class="section-title-row"><h3>Teams</h3><button id="addTeam" class="secondary">+ Add Team</button></div><div id="teamBuilder"></div>
