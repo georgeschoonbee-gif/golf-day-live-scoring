@@ -68,7 +68,7 @@ const euphoriaHoles=[
  {hole:1,par:4,stroke:15},{hole:2,par:4,stroke:3},{hole:3,par:5,stroke:7},{hole:4,par:4,stroke:1},{hole:5,par:4,stroke:9},{hole:6,par:3,stroke:13},{hole:7,par:4,stroke:5},{hole:8,par:3,stroke:11},{hole:9,par:5,stroke:17},
  {hole:10,par:4,stroke:4},{hole:11,par:4,stroke:16},{hole:12,par:5,stroke:12},{hole:13,par:4,stroke:6},{hole:14,par:4,stroke:14},{hole:15,par:3,stroke:18},{hole:16,par:4,stroke:8},{hole:17,par:3,stroke:10},{hole:18,par:5,stroke:2}
 ];
-const draft={name:"Golf Tour",teams:[{key:"team1",name:"Team 1",captain_name:"",captain_password:"",players:Array.from({length:8},(_,i)=>({player_order:i+1,name:`Player ${i+1}`,handicap:0,player_password:""}))},{key:"team2",name:"Team 2",captain_name:"",captain_password:"",players:Array.from({length:8},(_,i)=>({player_order:i+1,name:`Player ${i+1}`,handicap:0,player_password:""}))}],courses:[{key:"course1",name:"Elements",holes:clone(elementsHoles)},{key:"course2",name:"Zebula",holes:clone(zebulaHoles)},{key:"course3",name:"Euphoria",holes:clone(euphoriaHoles)}],rounds:[{round_no:1,name:"Day 1",play_date:"",course_key:"course1",team_a_key:"team1",team_b_key:"team2",format_code:"betterball_scramble_drive",players_per_side:2,match_count:4,scores_to_count:1,handicap_allowance:100,handicap_method:"off_lowest",min_drives:0},{round_no:2,name:"Day 2",play_date:"",course_key:"course2",team_a_key:"team1",team_b_key:"team2",format_code:"betterball_scramble_drive",players_per_side:2,match_count:4,scores_to_count:1,handicap_allowance:100,handicap_method:"off_lowest",min_drives:0},{round_no:3,name:"Day 3",play_date:"",course_key:"course3",team_a_key:"team1",team_b_key:"team2",format_code:"singles_match_play",players_per_side:1,match_count:8,scores_to_count:1,handicap_allowance:100,handicap_method:"off_lowest",min_drives:0}]};
+const draft={name:"Golf Tour",teams:[{key:"team1",name:"Team 1",captain_name:"",captain_password:"",players:Array.from({length:8},(_,i)=>({player_order:i+1,name:`Player ${i+1}`,handicap:0,player_password:""}))},{key:"team2",name:"Team 2",captain_name:"",captain_password:"",players:Array.from({length:8},(_,i)=>({player_order:i+1,name:`Player ${i+1}`,handicap:0,player_password:""}))}],courses:[{key:"course1",name:"Elements",holes:clone(elementsHoles)},{key:"course2",name:"Zebula",holes:clone(zebulaHoles)},{key:"course3",name:"Euphoria",holes:clone(euphoriaHoles)}],rounds:[{round_no:1,name:"Day 1",play_date:"",course_key:"course1",team_a_key:"team1",team_b_key:"team2",format_code:"betterball_scramble_drive",players_per_side:2,match_count:4,scores_to_count:1,handicap_allowance:100,handicap_method:"full",min_drives:0},{round_no:2,name:"Day 2",play_date:"",course_key:"course2",team_a_key:"team1",team_b_key:"team2",format_code:"betterball_match_play",players_per_side:2,match_count:4,scores_to_count:1,handicap_allowance:100,handicap_method:"full",min_drives:0},{round_no:3,name:"Day 3",play_date:"",course_key:"course3",team_a_key:"team1",team_b_key:"team2",format_code:"singles_match_play",players_per_side:1,match_count:8,scores_to_count:1,handicap_allowance:100,handicap_method:"full",min_drives:0}]};
 
 document.querySelectorAll(".tab-btn").forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
 function showTab(id){document.querySelectorAll(".tab-panel").forEach(x=>x.classList.remove("active"));document.querySelectorAll(".tab-btn").forEach(x=>x.classList.remove("active"));$(id).classList.add("active");document.querySelector(`.tab-btn[data-tab="${id}"]`).classList.add("active");if(id==="matches")renderMatches();if(id==="player")renderPlayer();if(id==="captain")renderCaptain();if(id==="admin")renderAdmin()}
@@ -81,7 +81,7 @@ function stableford(gross,par,hcp,si){if(!gross)return 0;const nett=gross-holeSt
 function matchState(m){const r=round(m.round_id),c=course(r.course_id),ta=team(m.team_a_id),tb=team(m.team_b_id);let aw=0,bw=0,thru=0;for(const h of c.holes){if(!m.players.every(mp=>!!score(m.id,mp.player_id,h.hole)))break;thru=h.hole;const ap=m.players.filter(x=>x.team_id===ta.id),bp=m.players.filter(x=>x.team_id===tb.id);let av,bv;if(r.format_code==="stableford_count"){const a=ap.map(mp=>{const p=player(mp.player_id),s=score(m.id,p.id,h.hole);return stableford(s.gross_score,h.par,strokesFor(m,r,p),h.stroke)}).sort((x,y)=>y-x),b=bp.map(mp=>{const p=player(mp.player_id),s=score(m.id,p.id,h.hole);return stableford(s.gross_score,h.par,strokesFor(m,r,p),h.stroke)}).sort((x,y)=>y-x);av=a.slice(0,r.scores_to_count).reduce((x,y)=>x+y,0);bv=b.slice(0,r.scores_to_count).reduce((x,y)=>x+y,0);if(av>bv)aw++;else if(bv>av)bw++}else{const calc=mp=>{const p=player(mp.player_id),s=score(m.id,p.id,h.hole);return r.format_code==="gross_match_play"?s.gross_score:s.gross_score-holeStrokes(strokesFor(m,r,p),h.stroke)};av=Math.min(...ap.map(calc));bv=Math.min(...bp.map(calc));if(av<bv)aw++;else if(bv<av)bw++}}const lead=aw-bw,remain=18-thru;let complete=false,resultText;if(Math.abs(lead)>remain){complete=true;resultText=`${Math.abs(lead)}&${remain}`}else if(thru===18){complete=true;resultText=lead===0?"AS":`${Math.abs(lead)} UP`}else resultText=lead===0?`AS thru ${thru}`:`${lead>0?ta.name:tb.name} ${Math.abs(lead)} UP thru ${thru}`;return{lead,thru,complete,resultText,pointsA:complete?(lead>0?1:lead===0?.5:0):0,pointsB:complete?(lead<0?1:lead===0?.5:0):0}}
 function overallPoints(){const map={};(bundle?.teams||[]).forEach(t=>map[t.id]=0);for(const m of bundle?.matches||[]){const s=matchState(m);map[m.team_a_id]+=s.pointsA;map[m.team_b_id]+=s.pointsB}return map}
 function totalTourPointsAvailable(){return (bundle?.rounds||[]).reduce((sum,r)=>sum+Number(r.match_count||0),0)}
-function pointsToWin(){const total=totalTourPointsAvailable();return Math.floor(total/2)+0.5}
+function pointsToWin(){const total=totalTourPointsAvailable();return total%2===0?total/2+0.5:(total+1)/2}
 function tourWinner(){const pts=overallPoints(),target=pointsToWin();return (bundle?.teams||[]).find(t=>(pts[t.id]||0)>=target)||null}
 async function load(){$("connectionStatus").textContent=navigator.onLine?"Connecting…":"Offline";try{const {data,error}=await db.rpc("tour_get_bundle",{p_event_id:null});if(error)throw error;bundle=data;saveBundleCache();$("connectionStatus").textContent="Live";renderAll();updateSyncStatus();if(getQueue().length)flushQueue()}catch(error){const cached=loadBundleCache();if(cached){bundle=cached;$("connectionStatus").textContent="Offline cache";renderAll();updateSyncStatus()}else{$("connectionStatus").textContent="Connection error";console.error(error)}}}
 function renderAll(){if(!bundle){$("eventSubtitle").textContent="No live tour yet";renderAdmin();return}$("eventSubtitle").textContent=bundle.event.name;renderHome();renderMatches();renderPlayer();renderCaptain();renderAdmin()}
@@ -296,10 +296,15 @@ function restoreDraft(){
   if(parsed&&parsed.name&&Array.isArray(parsed.teams)&&Array.isArray(parsed.courses)&&Array.isArray(parsed.rounds)){
    Object.keys(draft).forEach(k=>delete draft[k]);
    Object.assign(draft,parsed);
+   if(draft.rounds?.length>=3){
+    Object.assign(draft.rounds[0],{format_code:"betterball_scramble_drive",players_per_side:2,match_count:4,scores_to_count:1,handicap_allowance:100,handicap_method:"full"});
+    Object.assign(draft.rounds[1],{format_code:"betterball_match_play",players_per_side:2,match_count:4,scores_to_count:1,handicap_allowance:100,handicap_method:"full"});
+    Object.assign(draft.rounds[2],{format_code:"singles_match_play",players_per_side:1,match_count:8,scores_to_count:1,handicap_allowance:100,handicap_method:"full"});
+   }
   }
  }catch(e){console.warn("Could not restore draft",e)}
 }
-function renderBuilders(){$("tourName").value=draft.name;$("teamBuilder").innerHTML=draft.teams.map((t,ti)=>`<div class="builder-card teamBuild" data-ti="${ti}"><div class="team-builder-head"><input class="tbName" value="${esc(t.name)}"><button class="removeTeam secondary">Remove Team</button></div><div class="form-grid three"><label>Captain name<input class="tbCaptain" value="${esc(t.captain_name)}"></label><label>Captain password<input class="tbPass" value="${esc(t.captain_password)}"></label><span></span></div><div class="players">${t.players.map((p,pi)=>`<div class="player-builder"><input class="pbName" data-pi="${pi}" value="${esc(p.name)}" placeholder="Player name"><input class="pbHcp" data-pi="${pi}" type="number" value="${p.handicap}" placeholder="HCP"><input class="pbPin" data-pi="${pi}" type="text" inputmode="numeric" value="${esc(p.player_password||"")}" placeholder="Player PIN"><button class="removePlayer secondary" data-pi="${pi}">Remove</button></div>`).join("")}</div><button class="addPlayer secondary">+ Add Player</button></div>`).join("");$("courseBuilder").innerHTML=draft.courses.map((c,ci)=>`<div class="builder-card courseBuild" data-ci="${ci}"><div class="course-builder-head"><input class="cbName" value="${esc(c.name)}"><button class="removeCourse secondary">Remove Course</button></div><details><summary>18-hole setup</summary><div class="course-holes">${c.holes.map((h,hi)=>`<div class="hole-mini"><strong>Hole ${h.hole}</strong><label>Par<input class="chPar" data-hi="${hi}" type="number" value="${h.par}"></label><label>SI<input class="chSI" data-hi="${hi}" type="number" value="${h.stroke}"></label></div>`).join("")}</div></details></div>`).join("");$("roundBuilder").innerHTML=draft.rounds.map((r,ri)=>`<div class="builder-card roundBuild" data-ri="${ri}"><div class="section-title-row"><h3>Round ${ri+1}</h3><button class="removeRound secondary">Remove Round</button></div><div class="round-builder-grid"><label>Name<input class="rbName" value="${esc(r.name)}"></label><label>Date<input class="rbDate" type="date" value="${r.play_date}"></label><label>Course<select class="rbCourse">${draft.courses.map(c=>`<option value="${c.key}" ${c.key===r.course_key?"selected":""}>${esc(c.name)}</option>`).join("")}</select></label><label>Team A<select class="rbA">${draft.teams.map(t=>`<option value="${t.key}" ${t.key===r.team_a_key?"selected":""}>${esc(t.name)}</option>`).join("")}</select></label><label>Team B<select class="rbB">${draft.teams.map(t=>`<option value="${t.key}" ${t.key===r.team_b_key?"selected":""}>${esc(t.name)}</option>`).join("")}</select></label><label>Format<select class="rbFormat">${formatOptions(r.format_code)}</select></label><label>Players / side<input class="rbPlayers" type="number" value="${r.players_per_side}"></label><label>Matches<input class="rbMatches" type="number" value="${r.match_count}"></label><label>Scores to count<input class="rbCount" type="number" value="${r.scores_to_count}"></label><label>Handicap %<input class="rbHcp" type="number" value="${r.handicap_allowance}"></label><label>Handicap method<select class="rbMethod"><option value="off_lowest" ${r.handicap_method==="off_lowest"?"selected":""}>Off lowest player</option><option value="full" ${r.handicap_method==="full"?"selected":""}>Full playing handicap</option></select></label><label>Min drives<input class="rbDrives" type="number" value="${r.min_drives}"></label></div></div>`).join("");wireBuilders()}
+function renderBuilders(){$("tourName").value=draft.name;$("teamBuilder").innerHTML=draft.teams.map((t,ti)=>`<div class="builder-card teamBuild" data-ti="${ti}"><div class="team-builder-head"><input class="tbName" value="${esc(t.name)}"><button class="removeTeam secondary">Remove Team</button></div><div class="form-grid three"><label>Captain name<input class="tbCaptain" value="${esc(t.captain_name)}"></label><label>Captain password<input class="tbPass" value="${esc(t.captain_password)}"></label><span></span></div><div class="players">${t.players.map((p,pi)=>`<div class="player-builder"><input class="pbName" data-pi="${pi}" value="${esc(p.name)}" placeholder="Player name"><input class="pbHcp" data-pi="${pi}" type="number" value="${p.handicap}" placeholder="Base HCP optional"><input class="pbPin" data-pi="${pi}" type="text" inputmode="numeric" value="${esc(p.player_password||"")}" placeholder="Player PIN"><button class="removePlayer secondary" data-pi="${pi}">Remove</button></div>`).join("")}</div><button class="addPlayer secondary">+ Add Player</button></div>`).join("");$("courseBuilder").innerHTML=draft.courses.map((c,ci)=>`<div class="builder-card courseBuild" data-ci="${ci}"><div class="course-builder-head"><input class="cbName" value="${esc(c.name)}"><button class="removeCourse secondary">Remove Course</button></div><details><summary>18-hole setup</summary><div class="course-holes">${c.holes.map((h,hi)=>`<div class="hole-mini"><strong>Hole ${h.hole}</strong><label>Par<input class="chPar" data-hi="${hi}" type="number" value="${h.par}"></label><label>SI<input class="chSI" data-hi="${hi}" type="number" value="${h.stroke}"></label></div>`).join("")}</div></details></div>`).join("");$("roundBuilder").innerHTML=draft.rounds.map((r,ri)=>`<div class="builder-card roundBuild" data-ri="${ri}"><div class="section-title-row"><h3>Round ${ri+1}</h3><button class="removeRound secondary">Remove Round</button></div><div class="round-builder-grid"><label>Name<input class="rbName" value="${esc(r.name)}"></label><label>Date<input class="rbDate" type="date" value="${r.play_date}"></label><label>Course<select class="rbCourse">${draft.courses.map(c=>`<option value="${c.key}" ${c.key===r.course_key?"selected":""}>${esc(c.name)}</option>`).join("")}</select></label><label>Team A<select class="rbA">${draft.teams.map(t=>`<option value="${t.key}" ${t.key===r.team_a_key?"selected":""}>${esc(t.name)}</option>`).join("")}</select></label><label>Team B<select class="rbB">${draft.teams.map(t=>`<option value="${t.key}" ${t.key===r.team_b_key?"selected":""}>${esc(t.name)}</option>`).join("")}</select></label><label>Format<select class="rbFormat">${formatOptions(r.format_code)}</select></label><label>Players / side<input class="rbPlayers" type="number" value="${r.players_per_side}"></label><label>Matches<input class="rbMatches" type="number" value="${r.match_count}"></label><label>Scores to count<input class="rbCount" type="number" value="${r.scores_to_count}"></label><label>Handicap %<input class="rbHcp" type="number" value="${r.handicap_allowance}"></label><label>Handicap method<select class="rbMethod"><option value="off_lowest" ${r.handicap_method==="off_lowest"?"selected":""}>Off lowest player</option><option value="full" ${r.handicap_method==="full"?"selected":""}>Full playing handicap</option></select></label><label>Min drives<input class="rbDrives" type="number" value="${r.min_drives}"></label></div></div>`).join("");wireBuilders()}
 function syncDraft(){draft.name=$("tourName").value;document.querySelectorAll(".teamBuild").forEach(card=>{const t=draft.teams[+card.dataset.ti];t.name=card.querySelector(".tbName").value;t.captain_name=card.querySelector(".tbCaptain").value;t.captain_password=card.querySelector(".tbPass").value;card.querySelectorAll(".player-builder").forEach(row=>{const p=t.players[+row.querySelector(".pbName").dataset.pi];p.name=row.querySelector(".pbName").value;p.handicap=Number(row.querySelector(".pbHcp").value)||0;p.player_password=row.querySelector(".pbPin")?.value||""})});document.querySelectorAll(".courseBuild").forEach(card=>{const c=draft.courses[+card.dataset.ci];c.name=card.querySelector(".cbName").value;card.querySelectorAll(".hole-mini").forEach(hm=>{const hi=+hm.querySelector(".chPar").dataset.hi;c.holes[hi].par=Number(hm.querySelector(".chPar").value);c.holes[hi].stroke=Number(hm.querySelector(".chSI").value)})});document.querySelectorAll(".roundBuild").forEach(card=>{const r=draft.rounds[+card.dataset.ri];r.name=card.querySelector(".rbName").value;r.play_date=card.querySelector(".rbDate").value;r.course_key=card.querySelector(".rbCourse").value;r.team_a_key=card.querySelector(".rbA").value;r.team_b_key=card.querySelector(".rbB").value;r.format_code=card.querySelector(".rbFormat").value;r.players_per_side=Number(card.querySelector(".rbPlayers").value);r.match_count=Number(card.querySelector(".rbMatches").value);r.scores_to_count=Number(card.querySelector(".rbCount").value);r.handicap_allowance=Number(card.querySelector(".rbHcp").value);r.handicap_method=card.querySelector(".rbMethod").value;r.min_drives=Number(card.querySelector(".rbDrives").value)||0})}
 function wireBuilders(){document.querySelectorAll(".addPlayer").forEach(b=>b.onclick=e=>{syncDraft();const t=draft.teams[+e.target.closest(".teamBuild").dataset.ti];t.players.push({player_order:t.players.length+1,name:`Player ${t.players.length+1}`,handicap:0,player_password:""});renderBuilders()});document.querySelectorAll(".removePlayer").forEach(b=>b.onclick=e=>{syncDraft();const ti=+e.target.closest(".teamBuild").dataset.ti,pi=+e.target.dataset.pi;if(draft.teams[ti].players.length>1){draft.teams[ti].players.splice(pi,1);draft.teams[ti].players.forEach((p,i)=>p.player_order=i+1);renderBuilders()}});document.querySelectorAll(".removeTeam").forEach(b=>b.onclick=e=>{syncDraft();if(draft.teams.length>2){draft.teams.splice(+e.target.closest(".teamBuild").dataset.ti,1);renderBuilders()}});document.querySelectorAll(".removeCourse").forEach(b=>b.onclick=e=>{syncDraft();if(draft.courses.length>1){draft.courses.splice(+e.target.closest(".courseBuild").dataset.ci,1);renderBuilders()}});document.querySelectorAll(".removeRound").forEach(b=>b.onclick=e=>{syncDraft();if(draft.rounds.length>1){draft.rounds.splice(+e.target.closest(".roundBuild").dataset.ri,1);renderBuilders()}})}
 function validateDraft(){if(draft.teams.length<2)return"Add at least two teams.";for(const t of draft.teams){if(!t.name||!t.captain_password)return`${t.name||"Team"}: name and captain password required.`;for(const p of t.players){if(!p.name)return`${t.name}: every player needs a name.`;if(!p.player_password||p.player_password.length<4)return`${t.name} — ${p.name}: player PIN/password must be at least 4 characters.`}}for(const c of draft.courses){const sis=c.holes.map(h=>h.stroke);if(new Set(sis).size!==18)return`${c.name}: Stroke Index must use 1–18 once each.`}for(const r of draft.rounds){const a=draft.teams.find(t=>t.key===r.team_a_key),b=draft.teams.find(t=>t.key===r.team_b_key),need=r.players_per_side*r.match_count;if(!a||!b||a===b)return`${r.name}: choose two different teams.`;if(a.players.length<need||b.players.length<need)return`${r.name}: each team needs ${need} players.`;if(r.scores_to_count>r.players_per_side)return`${r.name}: scores to count cannot exceed players per side.`}return""}
@@ -308,3 +313,196 @@ function downloadPdf(){if(!bundle)return;const{jsPDF}=window.jspdf,doc=new jsPDF
 
 $("homeLiveRound").onchange=renderHomeLiveScoring;$("matchRoundSelect").onchange=renderMatches;$("playerTeam").onchange=populatePlayerNames;$("playerLogin").onclick=playerLogin;$("playerLogout").onclick=playerLogout;$("playerWorkspaceLogout").onclick=playerLogout;$("playerRound").onchange=renderPlayerMatches;$("saveCourseHandicap").onclick=saveCourseHandicap;$("playerMatch").onchange=()=>{$("playerHoleNumber").dataset.touched="";renderPlayerMatches()};$("playerPrevHole").onclick=()=>{$("playerHoleNumber").dataset.touched="1";setPlayerHole(Number($("playerHoleNumber").dataset.hole||1)-1)};$("playerNextHole").onclick=()=>{$("playerHoleNumber").dataset.touched="1";setPlayerHole(Number($("playerHoleNumber").dataset.hole||1)+1)};$("savePlayerScore").onclick=savePlayerScore;$("captainLogin").onclick=captainLogin;$("captainLogout").onclick=()=>{captain=null;localStorage.removeItem(CAPTAIN_SESSION_KEY);renderCaptain()};$("captainRoundSelect").onchange=renderLineupEditor;$("submitLineup").onclick=submitLineup;$("captainScoreRound").onchange=renderCaptainMatchSelect;$("captainMatchSelect").onchange=renderCaptainScoreRows;$("captainHoleSelect").onchange=renderCaptainScoreRows;$("saveCaptainScores").onclick=saveCaptainScores;$("adminPinTeam").onchange=renderAdminPinPlayers;$("savePlayerPin").onclick=saveAdminPlayerPin;$("adminLogin").onclick=adminLogin;$("adminLogout").onclick=()=>{adminUnlocked=false;adminPass="";renderAdmin()};$("startNewTour").onclick=()=>{$("newTourBuilder").classList.toggle("hidden");renderBuilders()};$("addTeam").onclick=()=>{syncDraft();const n=draft.teams.length+1;draft.teams.push({key:`team${Date.now()}`,name:`Team ${n}`,captain_name:"",captain_password:"",players:[]});renderBuilders()};$("addCourse").onclick=()=>{syncDraft();draft.courses.push({key:`course${Date.now()}`,name:`Course ${draft.courses.length+1}`,holes:clone(defaultHoles)});renderBuilders()};$("addRound").onclick=()=>{syncDraft();draft.rounds.push({round_no:draft.rounds.length+1,name:`Day ${draft.rounds.length+1}`,play_date:"",course_key:draft.courses[0]?.key||"",team_a_key:draft.teams[0]?.key||"",team_b_key:draft.teams[1]?.key||"",format_code:"singles_match_play",players_per_side:1,match_count:1,scores_to_count:1,handicap_allowance:100,handicap_method:"off_lowest",min_drives:0});renderBuilders()};$("saveTourDraft").onclick=saveDraft;$("createTour").onclick=createTour;$("adminScoreRound").onchange=renderAdminMatchSelect;$("adminScoreMatch").onchange=renderAdminScoreRows;$("adminScoreHole").onchange=renderAdminScoreRows;$("saveAdminScores").onclick=saveAdminScores;$("downloadPdf").onclick=downloadPdf;
 restoreDraft();if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(console.warn)}updateSyncStatus();db.channel("tour-live").on("postgres_changes",{event:"*",schema:"public",table:"tour_hole_scores"},load).on("postgres_changes",{event:"*",schema:"public",table:"tour_matches"},load).subscribe();load();
+
+/* === Jacobsdal Tour phone-first enhancements === */
+function notifyUser(message){
+ let box=document.getElementById("appToast");
+ if(!box){box=document.createElement("div");box.id="appToast";box.className="app-toast";document.body.appendChild(box)}
+ box.textContent=message;box.classList.add("show");
+ clearTimeout(notifyUser._t);notifyUser._t=setTimeout(()=>box.classList.remove("show"),2600);
+}
+
+function dailyCourseHandicap(playerId,roundId){
+ const x=(bundle?.course_handicaps||[]).find(v=>v.player_id===playerId&&v.round_id===roundId);
+ return x==null?null:Number(x.course_handicap);
+}
+
+function renderPlayerHoleStrip(){
+ const wrap=$("playerHoleStrip");if(!wrap||!playerSession||!bundle)return;
+ const m=bundle.matches.find(x=>x.id===$("playerMatch").value);if(!m){wrap.innerHTML="";return}
+ const current=Number($("playerHoleNumber").dataset.hole||1);
+ wrap.innerHTML=Array.from({length:18},(_,i)=>{
+   const h=i+1,s=score(m.id,playerSession.playerId,h);
+   return '<button type="button" class="hole-chip '+(s?'done ':'')+(h===current?'current':'')+'" data-hole="'+h+'">'+h+(s?' ✓':'')+'</button>';
+ }).join("");
+ wrap.querySelectorAll(".hole-chip").forEach(b=>b.onclick=()=>{$("playerHoleNumber").dataset.touched="1";setPlayerHole(Number(b.dataset.hole));renderPlayerHoleStrip();enhancePlayerScoring()});
+}
+
+function enhancePlayerScoring(){
+ if(!playerSession||!bundle||!$("playerMatch"))return;
+ renderPlayerHoleStrip();
+ const m=bundle.matches.find(x=>x.id===$("playerMatch").value);if(!m)return;
+ const r=round(m.round_id),crs=course(r.course_id),hn=Number($("playerHoleNumber").dataset.hole||1),h=crs?.holes?.find(x=>Number(x.hole)===hn);
+ const ch=dailyCourseHandicap(playerSession.playerId,r.id);
+ if(h){
+   const shots=ch==null?null:holeStrokes(Math.round(ch*Number(r.handicap_allowance||100)/100),h.stroke);
+   $("playerHoleMeta").textContent="Par "+h.par+" • SI "+h.stroke+(ch==null?" • CH needed":(" • CH "+ch+" • "+shots+" shot"+(shots===1?"":"s")));
+ }
+ const st=matchState(m),btn=$("savePlayerScore");
+ if(btn){
+   const closed=st.complete&&hn>st.thru;
+   btn.disabled=closed;
+   if(closed){btn.textContent="Match Finished • "+st.resultText}
+   else btn.textContent="Save & Next Hole";
+ }
+}
+
+function adjustGross(delta){
+ const el=$("playerGross");if(!el)return;
+ let v=Number(el.value)||0;
+ if(!v&&delta>0)v=3; else v+=delta;
+ v=Math.max(1,Math.min(20,v));el.value=v;
+}
+
+async function enhancedSavePlayerScore(){
+ if(!playerSession)return;
+ const m=bundle.matches.find(x=>x.id===$("playerMatch").value);if(!m)return;
+ const r=round(m.round_id),ch=dailyCourseHandicap(playerSession.playerId,r.id);
+ if(ch==null){
+   $("playerScoreStatus").textContent="Enter and save your Course Handicap for this round first.";
+   $("playerCourseHandicap").focus();notifyUser("Course Handicap required first");return;
+ }
+ const before=Number($("playerHoleNumber").dataset.hole||1);
+ await savePlayerScore();
+ const msg=$("playerScoreStatus").textContent;
+ if(/offline/i.test(msg))notifyUser("Score saved on phone • will sync");
+ else if(/saved/i.test(msg))notifyUser("Hole "+before+" saved ✓");
+ enhancePlayerScoring();
+}
+
+function matchPlayerProgress(m,pid){
+ let latest=0,count=0;
+ for(let h=1;h<=18;h++){if(score(m.id,pid,h)){latest=h;count++}}
+ return {latest,count};
+}
+
+function renderCaptainDashboard(){
+ const el=$("captainDashboard");if(!el||!captain||!bundle)return;
+ const rid=$("captainRoundSelect")?.value||bundle.rounds.find(r=>[r.team_a_id,r.team_b_id].includes(captain.teamId))?.id;
+ const r=round(rid);if(!r){el.innerHTML='<p class="muted">No round selected.</p>';return}
+ const ms=matchesForRound(r.id),t=team(captain.teamId);
+ const people=(t?.players||[]).map(p=>{
+   const m=ms.find(x=>x.players.some(mp=>mp.player_id===p.id));
+   const prog=m?matchPlayerProgress(m,p.id):{latest:0,count:0};
+   const ch=dailyCourseHandicap(p.id,r.id);
+   return '<div class="captain-player-row"><div><strong>'+esc(p.name)+'</strong><small>'+(m?'Match '+m.match_no:'Not paired')+'</small></div><span class="mini-pill '+(ch==null?'warn':'ok')+'">CH '+(ch==null?'Missing':ch)+'</span><span class="mini-pill">'+(prog.count?('Hole '+prog.latest):'No score')+'</span></div>';
+ }).join("");
+ const complete=ms.filter(m=>matchState(m).complete).length;
+ el.innerHTML='<div class="dashboard-summary"><strong>'+esc(r.name)+' • '+esc(course(r.course_id)?.name||"")+'</strong><span>'+complete+' / '+ms.length+' matches complete</span></div>'+people;
+}
+
+function renderAdminTourControl(){
+ const el=$("adminTourControl");if(!el||!adminUnlocked||!bundle)return;
+ el.innerHTML=bundle.rounds.map(r=>{
+   const ms=matchesForRound(r.id),done=ms.filter(m=>matchState(m).complete).length;
+   const pairedPlayers=[...new Set(ms.flatMap(m=>m.players.map(mp=>mp.player_id)))];
+   const missing=pairedPlayers.filter(pid=>dailyCourseHandicap(pid,r.id)==null).map(pid=>player(pid)?.name).filter(Boolean);
+   return '<div class="admin-round-control"><div><strong>'+esc(r.name)+' • '+esc(course(r.course_id)?.name||"")+'</strong><small>'+esc(formatLabel(r.format_code))+'</small></div><span class="mini-pill">'+done+'/'+ms.length+' finished</span><span class="mini-pill '+(missing.length?'warn':'ok')+'">'+(missing.length?(missing.length+' CH missing'):'All CH entered')+'</span>'+(missing.length?'<details><summary>Missing handicaps</summary><div class="small">'+missing.map(esc).join(", ")+'</div></details>':'')+'</div>';
+ }).join("");
+}
+
+function playerStats(){
+ const stats={};
+ for(const t of bundle.teams)for(const p of t.players)stats[p.id]={p,team:t,birdies:0,holesWon:0,played:0,lost:0,won:0,halved:0};
+ for(const s of bundle.scores||[]){
+   const m=bundle.matches.find(x=>x.id===s.match_id),r=m&&round(m.round_id),c=r&&course(r.course_id),h=c?.holes?.find(x=>Number(x.hole)===Number(s.hole_no));
+   if(h&&Number(s.gross_score)<Number(h.par)&&stats[s.player_id])stats[s.player_id].birdies++;
+ }
+ for(const m of bundle.matches||[]){
+   const r=round(m.round_id),c=course(r.course_id),st=matchState(m);
+   for(const mp of m.players){if(st.complete&&stats[mp.player_id])stats[mp.player_id].played++}
+   if(st.complete){
+     for(const mp of m.players){
+       const s=stats[mp.player_id];if(!s)continue;
+       if(st.lead===0)s.halved++;else{
+         const won=(st.lead>0&&mp.team_id===m.team_a_id)||(st.lead<0&&mp.team_id===m.team_b_id);
+         if(won)s.won++;else s.lost++;
+       }
+     }
+   }
+   if(!c)continue;
+   for(const h of c.holes){
+     if(!m.players.every(mp=>score(m.id,mp.player_id,h.hole)))break;
+     const ap=m.players.filter(x=>x.team_id===m.team_a_id),bp=m.players.filter(x=>x.team_id===m.team_b_id);
+     const calc=mp=>{const p=player(mp.player_id),ss=score(m.id,p.id,h.hole);return r.format_code==="gross_match_play"?ss.gross_score:ss.gross_score-holeStrokes(strokesFor(m,r,p),h.stroke)};
+     const av=Math.min(...ap.map(calc)),bv=Math.min(...bp.map(calc));
+     const winners=av<bv?ap:bv<av?bp:[];
+     winners.forEach(mp=>{if(stats[mp.player_id])stats[mp.player_id].holesWon++});
+   }
+ }
+ return Object.values(stats);
+}
+
+function renderTourHighlights(){
+ const el=$("tourHighlights");if(!el||!bundle)return;
+ const s=playerStats(),bird=[...s].sort((a,b)=>b.birdies-a.birdies)[0],holes=[...s].sort((a,b)=>b.holesWon-a.holesWon)[0];
+ const unbeaten=s.filter(x=>x.played>0&&x.lost===0).sort((a,b)=>b.won-a.won);
+ el.innerHTML='<div class="section-title-row"><div><h2>Tour Highlights</h2><p class="muted">Updates live from submitted scores.</p></div></div><div class="highlight-grid">'+
+   '<div class="highlight-card"><span>Most Birdies</span><strong>'+(bird?.birdies?esc(bird.p.name):'—')+'</strong><small>'+(bird?.birdies||0)+' birdies</small></div>'+
+   '<div class="highlight-card"><span>Most Holes Won</span><strong>'+(holes?.holesWon?esc(holes.p.name):'—')+'</strong><small>'+(holes?.holesWon||0)+' holes</small></div>'+
+   '<div class="highlight-card"><span>Unbeaten</span><strong>'+(unbeaten.length?unbeaten.slice(0,3).map(x=>esc(x.p.name)).join(", "):'—')+'</strong><small>'+(unbeaten.length?'No match losses':'No completed record yet')+'</small></div>'+
+ '</div>';
+}
+
+function publicTourUrl(){
+ const u=new URL(location.href);u.searchParams.set("spectator","1");u.hash="";return u.toString();
+}
+function renderTourQr(){
+ const el=$("tourQr");if(!el)return;el.innerHTML="";
+ if(window.QRCode)new QRCode(el,{text:publicTourUrl(),width:180,height:180,correctLevel:QRCode.CorrectLevel.M});
+ else el.innerHTML='<p class="muted">QR code needs an internet connection the first time. The share button still works.</p>';
+}
+async function shareLiveTour(){
+ const url=publicTourUrl(),title=(bundle?.event?.name||"Jacobsdal Golf Tour")+" — Live";
+ try{
+   if(navigator.share)await navigator.share({title,text:"Follow the live golf tour scores",url});
+   else{await navigator.clipboard.writeText(url);notifyUser("Live tour link copied");}
+ }catch(e){}
+}
+function applySpectatorMode(){
+ if(new URLSearchParams(location.search).get("spectator")!=="1")return;
+ document.body.classList.add("spectator-mode");
+ document.querySelectorAll(".tab-btn").forEach(b=>{if(b.dataset.tab!=="home")b.classList.add("hidden")});
+ showTab("home");
+}
+
+const _renderHome=renderHome;
+renderHome=function(){_renderHome();renderTourHighlights();renderTourQr()};
+
+const _renderPlayer=renderPlayer;
+renderPlayer=function(){_renderPlayer();if(playerSession)enhancePlayerScoring()};
+
+const _setPlayerHole=setPlayerHole;
+setPlayerHole=function(n){_setPlayerHole(n);enhancePlayerScoring()};
+
+const _renderCaptain=renderCaptain;
+renderCaptain=function(){_renderCaptain();renderCaptainDashboard()};
+
+const _renderAdmin=renderAdmin;
+renderAdmin=function(){_renderAdmin();renderAdminTourControl()};
+
+// Rebind controls that need the enhanced phone experience.
+if($("scoreMinus"))$("scoreMinus").onclick=()=>adjustGross(-1);
+if($("scorePlus"))$("scorePlus").onclick=()=>adjustGross(1);
+if($("savePlayerScore"))$("savePlayerScore").onclick=enhancedSavePlayerScore;
+if($("shareLiveTour"))$("shareLiveTour").onclick=shareLiveTour;
+if($("syncNow"))$("syncNow").onclick=async()=>{notifyUser(navigator.onLine?"Syncing…":"Still offline • scores remain safe on this phone");await flushQueue();updateSyncStatus();if(navigator.onLine)notifyUser(getQueue().length?"Some items still waiting":"All scores synced ✓")};
+if($("captainRefresh"))$("captainRefresh").onclick=async()=>{await load();renderCaptainDashboard()};
+if($("adminRefresh"))$("adminRefresh").onclick=async()=>{await load();renderAdminTourControl()};
+if($("captainRoundSelect"))$("captainRoundSelect").addEventListener("change",renderCaptainDashboard);
+if($("playerRound"))$("playerRound").addEventListener("change",()=>setTimeout(enhancePlayerScoring,0));
+if($("playerMatch"))$("playerMatch").addEventListener("change",()=>setTimeout(enhancePlayerScoring,0));
+window.addEventListener("online",()=>notifyUser("Signal restored • syncing scores"));
+window.addEventListener("offline",()=>notifyUser("Offline • scores will stay saved on this phone"));
+applySpectatorMode();
+setTimeout(()=>{renderTourHighlights();renderTourQr();if(playerSession)enhancePlayerScoring();if(captain)renderCaptainDashboard();if(adminUnlocked)renderAdminTourControl()},300);
