@@ -80,10 +80,12 @@
           <button id="playerWorkspaceLogout" class="secondary">Sign Out</button>
         </div>
         <div class="panel mobile-score-card">
-          <div class="form-grid two mobile-selects">
-            <label>Round<select id="playerRound"></select></label>
-            <label>Match<select id="playerMatch"></select></label>
-          </div>
+          <div id="playerRoundSetup" class="player-round-setup">
+            <div class="mobile-selects">
+              <label>Round<select id="playerRound"></select></label>
+              <select id="playerMatch" class="hidden" aria-hidden="true"></select>
+            </div>
+            <div id="assignedMatchCard" class="assigned-match-card"></div>
           <div id="courseHandicapBox" class="course-handicap-box">
             <label>Course Handicap for this round
               <input id="playerCourseHandicap" type="number" min="0" max="54" inputmode="decimal" placeholder="Enter course handicap">
@@ -95,6 +97,15 @@
             <span>Course Handicap <strong id="courseHandicapSavedValue">—</strong> ✓</span>
             <button id="changeCourseHandicap" type="button" class="secondary">Change</button>
           </div>
+          <button id="startPlayerRound" type="button" class="full-btn start-round-btn">Start Round</button>
+          <p id="startRoundStatus" class="muted center"></p>
+          </div>
+          <div id="playerRoundFinished" class="round-finished hidden">
+            <strong>Round finished ✓</strong>
+            <span id="playerRoundFinishedText"></span>
+            <button id="chooseAnotherRound" type="button" class="secondary">Choose another round</button>
+          </div>
+          <div id="playerScoringArea" class="hidden">
           <div id="playerMatchInfo" class="match-summary"></div>
           <div class="hole-nav">
             <button id="playerPrevHole" class="secondary hole-nav-btn">←</button>
@@ -113,6 +124,7 @@
           <div id="playerHoleResult" class="hole-result"></div>
           <button id="savePlayerScore" class="full-btn score-save-btn">Save My Score</button>
           <p id="playerScoreStatus" class="muted center"></p>
+          </div>
         </div>
       </div>
     </section>
