@@ -37,3 +37,7 @@ body{background:linear-gradient(180deg,#f3f7f4 0%,#eef3f0 100%);min-height:100vh
 
 .tour-target,.winner-target{margin-top:12px;padding:11px 13px;border-radius:12px;background:#eef7f1;color:#064226;font-weight:800;text-align:center}
 .winner-target{margin-bottom:14px;border:1px solid #cfe3d5}
+
+.course-handicap-box{margin:12px 0 16px;padding:14px;border:1px solid #cfe3d5;border-radius:14px;background:#f7fbf8}
+.course-handicap-box label{margin-bottom:8px}
+.course-handicap-box input{font-size:22px;font-weight:800;text-align:center}
