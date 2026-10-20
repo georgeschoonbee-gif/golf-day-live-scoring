@@ -144,3 +144,6 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .admin-hcp-row input{min-height:42px}
 .admin-hcp-row button{min-height:42px;padding:7px 10px}
 @media(max-width:520px){.admin-hcp-row{grid-template-columns:minmax(0,1fr) 76px 68px;font-size:14px}}
+
+/* reliable logo rendering */
+.club-logo,.player-login-brand img{object-fit:contain;background:#fff;display:block}
